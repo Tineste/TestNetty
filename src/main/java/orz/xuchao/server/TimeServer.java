@@ -3,11 +3,11 @@ package orz.xuchao.server;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.sctp.nio.NioSctpServerChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.LineBasedFrameDecoder;
-import io.netty.handler.codec.string.StringDecoder;
+import orz.xuchao.server.code.CustomDecoder;
+import orz.xuchao.server.code.CustomEncoder;
+import orz.xuchao.server.uicallback.UICallBack;
 
 
 /**
@@ -22,6 +22,16 @@ public class TimeServer
     private static final int LENGTH_FIELD_OFFSET = 2;
     private static final int LENGTH_ADJUSTMENT = 0;
     private static final int INITIAL_BYTES_TO_STRIP = 0;
+
+    private UICallBack mUICallBack;
+
+
+
+    public TimeServer(UICallBack mUICallBack){
+        this.mUICallBack = mUICallBack;
+    }
+
+
 
     public void bind(int port) throws Exception{
         EventLoopGroup bossGrop=new NioEventLoopGroup();
@@ -38,7 +48,7 @@ public class TimeServer
 //                            ch.pipeline().addLast(new StringDecoder());
                             ch.pipeline().addLast(new CustomDecoder(MAX_FRAME_LENGTH,LENGTH_FIELD_LENGTH,LENGTH_FIELD_OFFSET,LENGTH_ADJUSTMENT,INITIAL_BYTES_TO_STRIP,false));
                             ch.pipeline().addLast(new CustomEncoder());
-                            ch.pipeline().addLast(new TimeServerHandler());
+                            ch.pipeline().addLast(new TimeServerHandler(mUICallBack));
                         }
                     })
                     .childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -50,8 +60,5 @@ public class TimeServer
         }
     }
 
-    public static void main(String[] args) throws Exception{
-        int port=8080;
-        new TimeServer().bind(port);
-    }
+   
 }

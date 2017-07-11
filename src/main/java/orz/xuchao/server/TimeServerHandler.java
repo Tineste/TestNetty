@@ -2,24 +2,44 @@ package orz.xuchao.server;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerAdapter;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
+import orz.xuchao.server.bean.CustomMsg;
+import orz.xuchao.server.channelmanager.GatewayService;
+import orz.xuchao.server.uicallback.UICallBack;
+
 
 /**
  * Created by Administrator on 2017/7/6 0006.
  */
 public class TimeServerHandler extends ChannelInboundHandlerAdapter {
 
-    private  int counter;
+
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        super.handlerRemoved(ctx);
+        System.out.println("设备id为"+ctx.channel().id()+"的设备断开了连接");
+        mUICallBack.refreshText("\r\n设备id为"+ctx.channel().id()+"的设备断开了连接\r\n\r\n");
 
 
+    }
+
+    private UICallBack mUICallBack;
+
+
+    public TimeServerHandler(UICallBack mUICallBack){
+        this.mUICallBack = mUICallBack;
+    }
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         String uuid=ctx.channel().id().asLongText();
         GatewayService.addGatewayChannel(uuid,(SocketChannel)ctx.channel());
-        System.out.println("一个客户端连接进来了："+uuid);
+
+
+
+        System.out.println("一个客户端连接进来了："+uuid+"  目前有"+GatewayService.getChannels().size()+"个设备连入服务器 ");
+        mUICallBack.refreshText("\r\n一个客户端连接进来了："+uuid+"  目前有"+GatewayService.getChannels().size()+"个设备连入服务器 \r\n\r\n");
     }
 
     @Override
@@ -52,16 +72,360 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
 //        };
 //        ByteBuf resp= Unpooled.copiedBuffer(res);
 //        ctx.write(resp);
-
-        System.out.println("------------------------------服务器接收到客户端的应答-----------------------");
+        System.out.println("----------服务器收到命令----------------");
         if(msg instanceof CustomMsg) {
             CustomMsg customMsg = (CustomMsg)msg;
-            System.out.println(customMsg.getLen());
             ByteBuf buf=customMsg.getBody();
             byte[] req=new byte[buf.readableBytes()];
             buf.readBytes(req);
-            for (int i=0;i<req.length;i++){
-                System.out.println(req[i]);
+            String uuid=ctx.channel().id().asLongText();
+
+            switch (req[0]){
+                case 0x01: {
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("收到"+uuid+"指令0x01 \r\n ");
+                    System.out.println("收到指令0x01");
+                    for (int i = 1; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+                    System.out.println("  服务器返回客户端0x01指令的结果");
+                    sb.append("服务器返回客户端0x01指令的结果 \r\n\r\n");
+                    System.out.println();
+                    ByteBuf flag = Unpooled.buffer(2);
+                    flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+                    Short len=0xDA;
+                    byte channel = 0x11;
+                    byte protocolVersion = 0x01;
+                    byte[] byte1 = {0x01, 0x05, 0x01, 0x00, 0x01, 0x02, 0x03};
+//                    域名
+                    byte[] url = new byte[200];
+//                    端口号
+                    byte[] byte2 = {0x50, 0x50, 0x59, 0x3D, 0x34, 0x11, 0x01};
+                    byte[] data = new byte[byte1.length + url.length + byte2.length];
+                    System.arraycopy(byte1, 0, data, 0, byte1.length);
+                    System.arraycopy(url, 0, data, byte1.length, url.length);
+                    System.arraycopy(byte2, 0, data, byte1.length + url.length, byte2.length);
+                    ByteBuf body = Unpooled.buffer(data.length);
+                    body.writeBytes(data);
+                    ByteBuf end = Unpooled.buffer(2);
+                    end.writeBytes(new byte[]{0x2D, (byte) 0x6E});
+                    CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                    ctx.writeAndFlush(customMsg2);
+                    mUICallBack.refreshText(sb.toString());
+
+
+                }
+                    break;
+                case  0x02: {
+                    StringBuffer sb = new StringBuffer();
+                    sb.append("收到"+uuid+"指令0x02  \r\n");
+                    System.out.println("收到指令0x02");
+                    for (int i = 1; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+                    System.out.println("  服务器返回客户端0x02指令的结果");
+                    System.out.println();
+                    sb.append("服务器返回客户端0x02指令的结果\r\n\r\n");
+                    mUICallBack.refreshText(sb.toString());
+                    ByteBuf flag = Unpooled.buffer(2);
+                    flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+                    Short len=0x16;
+
+
+                    byte channel = 0x11;
+                    byte protocolVersion = 0x01;
+                    byte[] data= {0x02,
+                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                            0x01,0x02,0x03,0x04,
+                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                            0x01
+                    };
+                    ByteBuf body = Unpooled.buffer(data.length);
+                    body.writeBytes(data);
+                    ByteBuf end = Unpooled.buffer(2);
+                    end.writeBytes(new byte[]{0x2D, (byte) 0x6E});
+                    CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                    ctx.writeAndFlush(customMsg2);
+                }
+                break;
+                case 0x03:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x03的应答  \r\n");
+                    System.out.println("服务器收到客户端命令0x03的应答  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+                    System.out.println("服务器从智能门禁读取一条UID完成");
+                    sb.append("\r\n服务器从智能门禁读取一条UID完成\r\n\r\n");
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+                }
+                break;
+                case 0x04:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x04的应答  \r\n");
+                    System.out.println("服务器收到客户端命令0x04的应答  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+
+
+                    System.out.println("服务器写了一条UID和有效期到智能门禁指令完成");
+                    sb.append("\r\n服务器写了一条UID和有效期到智能门禁指令完成 \r\n\r\n");
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+                }
+                break;
+                case 0x05:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x05的应答 \r\n ");
+                    System.out.println("服务器收到客户端命令0x05的应答  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+
+
+                    System.out.println("服务器从智能门禁删除一条UID指令完成");
+                    sb.append("\r\n服务器从智能门禁删除一条UID指令完成\r\n\r\n");
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+                }
+                break;
+                case 0x06:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x06的应答 \r\n ");
+                    System.out.println("服务器收到客户端命令0x06的应答  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+
+
+                    System.out.println("服务器 开门 指令完成");
+                    sb.append("\r\n服务器 开门 指令完成\r\n\r\n");
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+
+                }
+                break;
+                case 0x07:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x07的请求 \r\n ");
+                    System.out.println("服务器收到客户端命令0x07的请求  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+                    System.out.println("服务器返回客户端0x07指令的结果");
+                    sb.append("服务器返回客户端0x07指令的结果\r\n\r\n");
+                    System.out.println();
+
+                    mUICallBack.refreshText(sb.toString());
+                    ByteBuf flag = Unpooled.buffer(2);
+                    flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+                    Short len=0x19;
+                    byte channel = 0x11;
+                    byte protocolVersion = 0x01;
+                    byte[] data= {0x07,
+                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,0x07,0x08,
+                            0x01,
+                            0x01,0x02,0x03,0x04,
+                            0x01
+                    };
+                    ByteBuf body = Unpooled.buffer(data.length);
+                    body.writeBytes(data);
+                    ByteBuf end = Unpooled.buffer(2);
+                    end.writeBytes(new byte[]{0x2D, (byte) 0x6E});
+                    CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                    ctx.writeAndFlush(customMsg2);
+                }
+                break;
+                case 0x08:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x08的请求 \r\n ");
+                    System.out.println("服务器收到客户端命令0x08的请求  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+                    System.out.println("服务器返回客户端0x08指令的结果");
+                    sb.append("服务器返回客户端0x08指令的结果\r\n\r\n");
+
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+                    ByteBuf flag = Unpooled.buffer(2);
+                    flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+                    Short len=0x14;
+                    byte channel = 0x11;
+                    byte protocolVersion = 0x01;
+                    byte[] data= {
+                            0x08,
+                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                            0x01,0x02,0x03,0x04,
+                            0x01,0x02,0x03,0x04,
+                            0x01
+                    };
+                    ByteBuf body = Unpooled.buffer(data.length);
+                    body.writeBytes(data);
+                    ByteBuf end = Unpooled.buffer(2);
+                    end.writeBytes(new byte[]{0x2D, (byte) 0x6E});
+                    CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                    ctx.writeAndFlush(customMsg2);
+                }
+                break;
+                case 0x09:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x09的应答 \r\n ");
+                    System.out.println("服务器收到客户端命令0x09的应答  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+
+
+                    System.out.println("服务器 清空智能门禁所有UID和有效期指令完成");
+                    sb.append("\r\n服务器 清空智能门禁所有UID和有效期指令完成\r\n\r\n");
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+
+                }
+                break;
+                case 0x0A:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x0A的请求\r\n");
+                    System.out.println("服务器收到客户端命令0x0A的请求  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+                    System.out.println("服务器返回客户端0x0A指令的结果");
+                    sb.append("服务器返回客户端0x0A指令的结果\r\n\r\n");
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+                    ByteBuf flag = Unpooled.buffer(2);
+                    flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+                    Short len=0x14;
+                    byte channel = 0x11;
+                    byte protocolVersion = 0x01;
+                    byte[] data= {
+                            0x0A,
+                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                            0x01,0x02,0x03,0x04,
+                            0x01,0x02,0x03,0x04,
+                            0x01
+                    };
+                    ByteBuf body = Unpooled.buffer(data.length);
+                    body.writeBytes(data);
+                    ByteBuf end = Unpooled.buffer(2);
+                    end.writeBytes(new byte[]{0x2D, (byte) 0x6E});
+                    CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                    ctx.writeAndFlush(customMsg2);
+                }
+                break;
+                case 0x0B:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x0B的请求  \r\n");
+                    System.out.println("服务器收到客户端命令0x0B的请求  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+                    System.out.println("服务器返回客户端0x0B指令的结果");
+                    sb.append("服务器返回客户端0x0B指令的结果\r\n\r\n");
+
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+                    ByteBuf flag = Unpooled.buffer(2);
+                    flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+                    Short len=0x11;
+                    byte channel = 0x11;
+                    byte protocolVersion = 0x01;
+                    byte[] data= {
+                            0x0B,
+                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                            0x01,
+                            0x01,0x02,0x03,0x04,
+                            0x01
+                    };
+                    ByteBuf body = Unpooled.buffer(data.length);
+                    body.writeBytes(data);
+                    ByteBuf end = Unpooled.buffer(2);
+                    end.writeBytes(new byte[]{0x2D, (byte) 0x6E});
+                    CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                    ctx.writeAndFlush(customMsg2);
+                }
+                break;
+                case 0x0C:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x0C的应答  \r\n");
+                    System.out.println("服务器收到客户端命令0x0C的应答  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+
+
+                    System.out.println("服务器 读取给定时间范围内开门日志指令 完成");
+                    sb.append("\r\n服务器 读取给定时间范围内开门日志指令 完成\r\n\r\n");
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+
+                }
+                break;
+                case 0x0D:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x0D的应答 \r\n ");
+                    System.out.println("服务器收到客户端命令0x0D的应答  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+
+
+                    System.out.println("服务器 读取给定时间范围内开门日志指令 完成");
+                    sb.append("\r\n服务器 读取给定时间范围内开门日志指令完成\r\n\r\n");
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+
+                }
+                break;
+                case 0x0E:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x0E的应答\r\n  ");
+                    System.out.println("服务器收到客户端命令0x0E的应答  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+
+
+                    System.out.println("服务器向智能门禁发送远程重启指令  完成");
+                    sb.append("\r\n服务器向智能门禁发送远程重启指令  完成\r\n\r\n");
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+
+                }
+                break;
             }
         }
 

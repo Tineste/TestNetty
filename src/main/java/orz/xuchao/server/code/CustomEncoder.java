@@ -1,10 +1,9 @@
-package orz.xuchao.server;
+package orz.xuchao.server.code;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-
-import java.nio.charset.Charset;
+import orz.xuchao.server.bean.CustomMsg;
 
 /**
  * Created by Administrator on 2017/7/7 0007.
@@ -17,14 +16,14 @@ public class CustomEncoder  extends MessageToByteEncoder<CustomMsg> {
         }
 
         ByteBuf flag = msg.getFlag();
-        int len = msg.getLen();
+        Short len = msg.getLen();
         byte channel= msg.getChannel();
         byte protocolVersion = msg.getProtocolVersion();
         ByteBuf body = msg.getBody();
         ByteBuf end = msg.getEnd();
 
         out.writeBytes(flag);
-        out.writeInt(len);
+        out.writeShort(len);
         out.writeByte(channel);
         out.writeByte(protocolVersion);
         out.writeBytes(body);

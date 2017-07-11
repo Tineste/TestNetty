@@ -1,4 +1,4 @@
-package orz.xuchao.server;
+package orz.xuchao.server.bean;
 
 import io.netty.buffer.ByteBuf;
 
@@ -8,14 +8,14 @@ import io.netty.buffer.ByteBuf;
 public class CustomMsg {
 
     private ByteBuf flag;//开始标识符号
-    private int len;//长度
+    private Short len;//长度
     private byte channel;//信道
     private byte protocolVersion;//协议版本
     private ByteBuf body;//包体
     private ByteBuf end;//包尾
 
 
-    public CustomMsg(  ByteBuf flag, int len, byte channel, byte protocolVersion, ByteBuf body, ByteBuf end){
+    public CustomMsg(  ByteBuf flag, Short len, byte channel, byte protocolVersion, ByteBuf body, ByteBuf end){
         this.flag=flag;
         this.len=len;//长度
         this.channel=channel;//信道
@@ -32,11 +32,11 @@ public class CustomMsg {
         this.flag = flag;
     }
 
-    public int getLen() {
+    public Short getLen() {
         return len;
     }
 
-    public void setLen(int len) {
+    public void setLen(Short len) {
         this.len = len;
     }
 

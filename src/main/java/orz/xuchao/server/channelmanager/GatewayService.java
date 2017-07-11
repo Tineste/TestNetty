@@ -1,4 +1,4 @@
-package orz.xuchao.server;
+package orz.xuchao.server.channelmanager;
 
 import io.netty.channel.socket.SocketChannel;
 
