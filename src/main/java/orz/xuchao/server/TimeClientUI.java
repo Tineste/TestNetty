@@ -2,6 +2,8 @@ package orz.xuchao.server;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import orz.xuchao.server.bean.BasePackage;
+import orz.xuchao.server.bean.clientsends.GetURLAndIP;
 import orz.xuchao.server.bean.CustomMsg;
 import orz.xuchao.server.uicallback.UICallBack;
 
@@ -14,21 +16,15 @@ import java.awt.event.ActionListener;
  * Created by Administrator on 2017/7/5 0005.
  */
 public class TimeClientUI extends JFrame{
-
+//    private final JButton sendB0;
     private  JButton sendB5;
     private  JButton sendB6;
     public TimeClient timeClient;
     private JTextArea receivedTF;
     private JButton sendB1,sendB2,sendB3,sendB4;
     private JLabel jl1;
-
-
-
-
-
-
+//    private JTextField tv;
     UICallBack mUICallBack;
-
     public TimeClientUI() {
         this.setTitle("客户端");
         this.setBounds(0, 0, 600, 800);
@@ -40,7 +36,44 @@ public class TimeClientUI extends JFrame{
         this.setVisible(true);
         // 创建一个容器
         Container con = this.getContentPane();
-
+//        tv=new JTextField();
+//        tv.setBounds(50,10,250,20);
+//        // 按钮设定
+//        sendB0 = new JButton("发送自定义消息");
+//        sendB0.setBounds(310, 10, 200, 20);
+//        sendB0.addActionListener(new ActionListener() {
+//            public void actionPerformed(ActionEvent e) {
+//                System.out.println("发送自定义消息");
+////                建立通道后就开始持续向服务器发送心跳包
+//                ByteBuf flag = Unpooled.buffer(2);
+//                flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+//                byte channel = 0x11;
+//                byte protocolVersion = 0x01;
+//                byte[] order={0x0F};
+//                short len;
+//                try {
+////                    bbody = tv.getText().getBytes("UTF-8");
+//                    byte[] bbody = {0x01,0x02};
+//                    byte[] data = new byte[order.length + bbody.length ];
+//                    byte[] time={0x01,0x02,0x03,0x04};
+//                    System.arraycopy(order, 0, data, 0, order.length);
+//                    System.arraycopy(bbody, 0, data, order.length, bbody.length);
+//                    byte[] data1 = new byte[data.length + time.length ];
+//                    System.arraycopy(data, 0, data1, 0, data.length);
+//                    System.arraycopy(time, 0, data1, data.length, time.length);
+//                    int num=(3+data1.length+4+2);
+//                     len = (short)num;
+//                    ByteBuf body = Unpooled.buffer(data1.length);
+//                    body.writeBytes(data1);
+//                    ByteBuf end = Unpooled.buffer(2);
+//                    end.writeBytes(new byte[]{0x6F, (byte) 0x6B});
+//                    CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+//                    timeClient.socketChannel.writeAndFlush(customMsg2);
+//                } catch (Exception e1) {
+//                    e1.printStackTrace();
+//                }
+//            }
+//        });
 
 
 
@@ -52,36 +85,56 @@ public class TimeClientUI extends JFrame{
         jsp.setBounds(50, 220, 500, 500);
         //默认的设置是超过文本框才会显示滚动条，以下设置让滚动条一直显示
         jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-
-
-
-
         // 按钮设定
         sendB1 = new JButton("从中心服务器获取具体要链接的前置服务器域名或ip 0x01");
         sendB1.setBounds(50, 40, 500, 20);
         sendB1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println(" 从中心服务器 获取具体要链接的前置服务器域名或IP");
-//                开始标识
+//                System.out.println(" 从中心服务器 获取具体要链接的前置服务器域名或IP");
+////                开始标识
+//                ByteBuf flag=Unpooled.buffer(2);
+//                flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+////                长度
+//                Short len=0x0F;
+////                信道
+//                byte channel=0x01;
+////                协议版本
+//                byte protocolVersion=0x01;
+////                包体
+//                byte[] bbody={0x01
+//                        ,0x05,0x01,0x00,0x01,0x02,0x03
+//                        ,0x59,0x3D,0x34,0x11};
+//                ByteBuf body=Unpooled.buffer(bbody.length);
+//                body.writeBytes(bbody);
+////                包尾
+//                ByteBuf end=Unpooled.buffer(2);
+//                end.writeBytes(new byte[]{0x51,(byte)0xC7});
+//                CustomMsg customMsg = new CustomMsg(flag, len,channel,protocolVersion,body, end);
+//                timeClient.socketChannel.writeAndFlush(customMsg);
+
+
+                BasePackage mBasePackage=new BasePackage();
                 ByteBuf flag=Unpooled.buffer(2);
                 flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-//                长度
-                Short len=0x0F;
-//                信道
-                byte channel=0x01;
-//                协议版本
-                byte protocolVersion=0x01;
-//                包体
+                mBasePackage.setFlag(flag);
+                mBasePackage.setChannel((byte) 0x01);
+                mBasePackage.setProtocolVersion((byte) 0x01);
                 byte[] bbody={0x01
                         ,0x05,0x01,0x00,0x01,0x02,0x03
                         ,0x59,0x3D,0x34,0x11};
                 ByteBuf body=Unpooled.buffer(bbody.length);
                 body.writeBytes(bbody);
-//                包尾
-                ByteBuf end=Unpooled.buffer(2);
-                end.writeBytes(new byte[]{0x51,(byte)0xC7});
-                CustomMsg customMsg = new CustomMsg(flag, len,channel,protocolVersion,body, end);
-                timeClient.socketChannel.writeAndFlush(customMsg);
+                mBasePackage.setBody(body);
+                timeClient.socketChannel.writeAndFlush(mBasePackage.getCustomMsg());
+
+
+
+
+
+
+
+
+
             }
         });
         // 按钮设定
@@ -235,12 +288,17 @@ public class TimeClientUI extends JFrame{
         jl1.setBounds(0, 0, 355, 265);
 
         jl1.add(sendB1);
+//        jl1.add(tv);
+//        jl1.add(sendB0);
         jl1.add(sendB2);
         jl1.add(sendB3);
         jl1.add(sendB4);
         jl1.add(sendB5);
         jl1.add(sendB6);
         jl1.add(jsp);
+
+
+
         con.add(jl1);
 
         mUICallBack= new UICallBack() {
@@ -255,7 +313,7 @@ public class TimeClientUI extends JFrame{
          timeClient=new TimeClient(mUICallBack);
         try {
 
-            timeClient.connect(8080,"127.0.0.1");
+            timeClient.connect(8981,"127.0.0.1");
 
 
         } catch (Exception e) {

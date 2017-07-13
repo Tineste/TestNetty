@@ -4,8 +4,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import orz.xuchao.server.bean.BasePackage;
 import orz.xuchao.server.bean.CustomMsg;
 import orz.xuchao.server.uicallback.UICallBack;
+import orz.xuchao.server.utils.CRCUtil;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -89,14 +91,19 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
             buf.readBytes(req);
             switch (req[0]){
                 case 0x01: {
+                    BasePackage mBasePackage=new BasePackage();
+                    mBasePackage.setCustomMsg((CustomMsg)msg);
                     StringBuffer sb = new StringBuffer();
                     sb.append("客户收到端服务器命令0x01  \r\n");
                     System.out.println("客户收到端服务器命令0x01  ");
-                    for (int i = 0; i < 20; i++) {
-                        System.out.print(req[i]);
-                        sb.append(req[i]+".");
+
+                    if( mBasePackage.checkCRC()){
+                        sb.append("CRC验证成功！\r\n");
+                    }else {
+                        sb.append("CRC验证成功！\r\n");
                     }
-                    sb.append("...");
+
+                    sb.append(CRCUtil.bytesToHexString(req)+".");
                     System.out.println("...");
 
                     System.out.println("从中心服务器获取具体要链接的前置服务器域名或IP 完成");
@@ -104,6 +111,18 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
                     System.out.println();
                     mUICallBack.refreshText(sb.toString());
                 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 //                    System.out.println("----------------------------客户端应答服务器请求--------------------------");
 //                    ByteBuf flag=Unpooled.buffer(2);
@@ -495,7 +514,20 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
 
                 }
                 break;
-
+                case 0x0F:{
+                    StringBuffer sb = new StringBuffer();
+                    sb.append("客户端收到服务器命令0x0F  \r\n");
+                    System.out.println("客户收到端服务器命令0x0F  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println("客户端自定义消息发送完成");
+                    sb.append("\r\n客户端自定义消息发送完成\r\n\r\n");
+                    mUICallBack.refreshText(sb.toString());
+                    System.out.println();
+                }
+                break;
                 default:
                     break;
             }

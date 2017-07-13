@@ -11,8 +11,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Created by Administrator on 2017/7/5 0005.
@@ -27,9 +32,13 @@ public class TimeServerUI extends JFrame{
     private JTextArea receivedTF;
     private JButton sendB,sendB1,sendB2,sendB3;
     private JLabel jl1;
-    UICallBack mUICallBack;
+    private UICallBack mUICallBack;
 
-    public TimeServerUI() {
+    private int port;
+
+
+    public TimeServerUI(int port) {
+        this.port=port;
         this.setTitle("服务器端");
         this.setBounds(0, 0, 600, 600);
         // 窗体大小不能改变
@@ -69,9 +78,6 @@ public class TimeServerUI extends JFrame{
         sendB7 = new JButton("服务器向智能门禁发送远程重启指令 0x0E");
         sendB7.setBounds(50, 250, 500, 20);
 
-
-
-
          receivedTF= new JTextArea();
         //在文本框上添加滚动条
         JScrollPane jsp = new JScrollPane(receivedTF);
@@ -80,14 +86,8 @@ public class TimeServerUI extends JFrame{
         //默认的设置是超过文本框才会显示滚动条，以下设置让滚动条一直显示
         jsp.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
-
-
-
-
-
         jl1 = new JLabel();
         jl1.setBounds(0, 0, 355, 265);
-
 
         // 给按钮添加1个事件
         sendB.addActionListener(new ActionListener() {
@@ -195,7 +195,6 @@ public class TimeServerUI extends JFrame{
         });
         // 给按钮添加1个事件
         sendB3.addActionListener(new ActionListener() {
-
 
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -403,20 +402,44 @@ public class TimeServerUI extends JFrame{
                 receivedTF.selectAll();
             }
         };
+
         mTimeServer= new TimeServer(mUICallBack);
         //        启动客户端
         try {
-            mTimeServer.bind(8080);
+            mTimeServer.bind(port);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
     public static void main(String[] args) {
+        int port = 8981;
+        try {
+//            Properties prop1 = new Properties();
+//            ///保存属性到b.properties文件
+//            FileOutputStream oFile = new FileOutputStream("b.properties", true);//true表示追加打开
+//            prop1.setProperty("port", "8080");
+//            prop1.store(oFile, "The New properties file");
+//            oFile.close();
+
+            Properties prop2 = new Properties();
+            //读取属性文件a.properties
+            InputStream in = new BufferedInputStream(new FileInputStream("b.properties"));
+            prop2.load(in);     ///加载属性列表
+
+            if(null!=prop2.getProperty("port")){
+                port = Integer.valueOf(prop2.getProperty("port"));
+            }
+
+
+            in.close();
+
+        }catch (Exception e){
+
+        }
         // 实例化对象
-        TimeServerUI qq = new TimeServerUI();
-
-
-
+        TimeServerUI qq = new TimeServerUI(port);
     }
+
+
 }

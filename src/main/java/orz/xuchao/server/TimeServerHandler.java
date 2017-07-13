@@ -5,9 +5,11 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
+import orz.xuchao.server.bean.BasePackage;
 import orz.xuchao.server.bean.CustomMsg;
 import orz.xuchao.server.channelmanager.GatewayService;
 import orz.xuchao.server.uicallback.UICallBack;
+import orz.xuchao.server.utils.CRCUtil;
 
 
 /**
@@ -19,6 +21,8 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         super.handlerRemoved(ctx);
+        String uuid=ctx.channel().id().asLongText();
+        GatewayService.removeGatewayChannel(uuid);
         System.out.println("设备id为"+ctx.channel().id()+"的设备断开了连接");
         mUICallBack.refreshText("\r\n设备id为"+ctx.channel().id()+"的设备断开了连接\r\n\r\n");
 
@@ -80,24 +84,73 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
             buf.readBytes(req);
             String uuid=ctx.channel().id().asLongText();
 
+
+
             switch (req[0]){
                 case 0x01: {
+//                    StringBuffer sb=new StringBuffer();
+//                    sb.append("收到"+uuid+"指令0x01 \r\n ");
+//                    System.out.println("收到指令0x01");
+//                    for (int i = 1; i < req.length; i++) {
+//                        System.out.print(req[i]);
+//                        sb.append(req[i]+".");
+//                    }
+//                    System.out.println();
+//                    System.out.println("  服务器返回客户端0x01指令的结果");
+//                    sb.append("服务器返回客户端0x01指令的结果 \r\n\r\n");
+//                    System.out.println();
+//                    ByteBuf flag = Unpooled.buffer(2);
+//                    flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+//                    Short len=0xDA;
+//                    byte channel = 0x11;
+//                    byte protocolVersion = 0x01;
+//                    byte[] byte1 = {0x01, 0x05, 0x01, 0x00, 0x01, 0x02, 0x03};
+////                    域名
+//                    byte[] url = new byte[200];
+////                    端口号
+//                    byte[] byte2 = {0x50, 0x50, 0x59, 0x3D, 0x34, 0x11, 0x01};
+//                    byte[] data = new byte[byte1.length + url.length + byte2.length];
+//                    System.arraycopy(byte1, 0, data, 0, byte1.length);
+//                    System.arraycopy(url, 0, data, byte1.length, url.length);
+//                    System.arraycopy(byte2, 0, data, byte1.length + url.length, byte2.length);
+//                    ByteBuf body = Unpooled.buffer(data.length);
+//                    body.writeBytes(data);
+//                    ByteBuf end = Unpooled.buffer(2);
+//                    end.writeBytes(new byte[]{0x2D, (byte) 0x6E});
+//                    CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+//                    ctx.writeAndFlush(customMsg2);
+//                    mUICallBack.refreshText(sb.toString());
+
+
+
+                    BasePackage mBasePackage=new BasePackage();
+                    mBasePackage.setCustomMsg((CustomMsg)msg);
+
+
                     StringBuffer sb=new StringBuffer();
                     sb.append("收到"+uuid+"指令0x01 \r\n ");
                     System.out.println("收到指令0x01");
-                    for (int i = 1; i < req.length; i++) {
-                        System.out.print(req[i]);
-                        sb.append(req[i]+".");
+                    if( mBasePackage.checkCRC()){
+                        sb.append("CRC验证成功！\r\n");
+                    }else {
+                        sb.append("CRC验证成功！\r\n");
                     }
+                    sb.append(CRCUtil.bytesToHexString(req)+".");
                     System.out.println();
                     System.out.println("  服务器返回客户端0x01指令的结果");
                     sb.append("服务器返回客户端0x01指令的结果 \r\n\r\n");
                     System.out.println();
-                    ByteBuf flag = Unpooled.buffer(2);
-                    flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
-                    Short len=0xDA;
-                    byte channel = 0x11;
-                    byte protocolVersion = 0x01;
+
+
+
+
+
+                    BasePackage mBasePackage2=new BasePackage();
+                    ByteBuf flag=Unpooled.buffer(2);
+                    flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                    mBasePackage2.setFlag(flag);
+                    mBasePackage2.setChannel((byte) 0x11);
+                    mBasePackage2.setProtocolVersion((byte) 0x01);
                     byte[] byte1 = {0x01, 0x05, 0x01, 0x00, 0x01, 0x02, 0x03};
 //                    域名
                     byte[] url = new byte[200];
@@ -107,13 +160,40 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     System.arraycopy(byte1, 0, data, 0, byte1.length);
                     System.arraycopy(url, 0, data, byte1.length, url.length);
                     System.arraycopy(byte2, 0, data, byte1.length + url.length, byte2.length);
-                    ByteBuf body = Unpooled.buffer(data.length);
+                    ByteBuf body=Unpooled.buffer(data.length);
                     body.writeBytes(data);
-                    ByteBuf end = Unpooled.buffer(2);
-                    end.writeBytes(new byte[]{0x2D, (byte) 0x6E});
-                    CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
-                    ctx.writeAndFlush(customMsg2);
+                    mBasePackage2.setBody(body);
+                    ctx.writeAndFlush(mBasePackage2.getCustomMsg());
                     mUICallBack.refreshText(sb.toString());
+
+
+
+
+
+
+//                    ByteBuf flag = Unpooled.buffer(2);
+//                    flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+//                    Short len=0xDA;
+//                    byte channel = 0x11;
+//                    byte protocolVersion = 0x01;
+//                    byte[] byte1 = {0x01, 0x05, 0x01, 0x00, 0x01, 0x02, 0x03};
+////                    域名
+//                    byte[] url = new byte[200];
+////                    端口号
+//                    byte[] byte2 = {0x50, 0x50, 0x59, 0x3D, 0x34, 0x11, 0x01};
+//                    byte[] data = new byte[byte1.length + url.length + byte2.length];
+//                    System.arraycopy(byte1, 0, data, 0, byte1.length);
+//                    System.arraycopy(url, 0, data, byte1.length, url.length);
+//                    System.arraycopy(byte2, 0, data, byte1.length + url.length, byte2.length);
+//                    ByteBuf body = Unpooled.buffer(data.length);
+//                    body.writeBytes(data);
+//                    ByteBuf end = Unpooled.buffer(2);
+//                    end.writeBytes(new byte[]{0x2D, (byte) 0x6E});
+//                    CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+//                    ctx.writeAndFlush(customMsg2);
+//                    mUICallBack.refreshText(sb.toString());
+
+
 
 
                 }
@@ -423,6 +503,44 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     sb.append("\r\n服务器向智能门禁发送远程重启指令  完成\r\n\r\n");
                     System.out.println();
                     mUICallBack.refreshText(sb.toString());
+
+                }
+                break;
+                case 0x0F:{
+                    StringBuffer sb=new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x0F的应答\r\n  ");
+                    System.out.println("服务器收到客户端命令0x0F的应答  ");
+                    for (int i = 0; i < req.length; i++) {
+                        System.out.print(req[i]);
+                        sb.append(req[i]+".");
+                    }
+                    System.out.println();
+                    System.out.println("服务器向智能门禁发自定义消息 完成，消息内容为 "+new String(req,"UTF-8") );
+
+
+                    sb.append("\r\n"+new String(req,"UTF-8")  +"完成\r\n\r\n");
+                    System.out.println();
+                    mUICallBack.refreshText(sb.toString());
+
+
+                    ByteBuf flag = Unpooled.buffer(2);
+                    flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+                    Short len=0x11;
+                    byte channel = 0x11;
+                    byte protocolVersion = 0x01;
+                    byte[] data= {
+                            0x0B,
+                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                            0x01,
+                            0x01,0x02,0x03,0x04,
+                            0x01
+                    };
+                    ByteBuf body = Unpooled.buffer(data.length);
+                    body.writeBytes(data);
+                    ByteBuf end = Unpooled.buffer(2);
+                    end.writeBytes(new byte[]{0x2D, (byte) 0x6E});
+                    CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                    ctx.writeAndFlush(customMsg2);
 
                 }
                 break;

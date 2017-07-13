@@ -59,29 +59,29 @@ public class TimeClient {
             if(f.isSuccess()){
                 socketChannel=(SocketChannel)f.channel();
 //                建立通道后就开始持续向服务器发送心跳包
-                Timer tme =new Timer("心跳包");
-                tme.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        ByteBuf flag = Unpooled.buffer(2);
-                        flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
-                        Short len = 0x10;
-                        byte channel = 0x11;
-                        byte protocolVersion = 0x01;
-                        byte[] bbody = {
-                                0x08,
-                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                                0x01,
-                                0x01, 0x02, 0x03, 0x04,
-                        };
-                        ByteBuf body = Unpooled.buffer(bbody.length);
-                        body.writeBytes(bbody);
-                        ByteBuf end = Unpooled.buffer(2);
-                        end.writeBytes(new byte[]{0x6F, (byte) 0x6B});
-                        CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
-                        socketChannel.writeAndFlush(customMsg2);
-                    }
-                },1000,5000);
+//                Timer tme =new Timer("心跳包");
+//                tme.schedule(new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        ByteBuf flag = Unpooled.buffer(2);
+//                        flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+//                        Short len = 0x10;
+//                        byte channel = 0x11;
+//                        byte protocolVersion = 0x01;
+//                        byte[] bbody = {
+//                                0x08,
+//                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+//                                0x01,
+//                                0x01, 0x02, 0x03, 0x04,
+//                        };
+//                        ByteBuf body = Unpooled.buffer(bbody.length);
+//                        body.writeBytes(bbody);
+//                        ByteBuf end = Unpooled.buffer(2);
+//                        end.writeBytes(new byte[]{0x6F, (byte) 0x6B});
+//                        CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+//                        socketChannel.writeAndFlush(customMsg2);
+//                    }
+//                },1000,5*1000*60);
             }
 //            f.channel().closeFuture();
         }finally {
