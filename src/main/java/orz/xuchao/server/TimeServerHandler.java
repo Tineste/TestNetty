@@ -79,11 +79,35 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
         System.out.println("----------服务器收到命令----------------");
         if(msg instanceof CustomMsg) {
             CustomMsg customMsg = (CustomMsg)msg;
-            ByteBuf buf=customMsg.getBody();
-            byte[] req=new byte[buf.readableBytes()];
-            buf.readBytes(req);
-            String uuid=ctx.channel().id().asLongText();
 
+
+
+            ByteBuf customMsgFlag=customMsg.getFlag();
+            Short customMsgLen=customMsg.getLen();
+            byte customMsgChannel=customMsg.getChannel();
+            byte customMsgProtocolVersion=customMsg.getProtocolVersion();
+            ByteBuf customMsgEnd=customMsg.getEnd();
+            ByteBuf customMsgBody=customMsg.getBody();
+
+//            byte[] byteFlag=new byte[customMsgFlag.readableBytes()];
+//            customMsgFlag.readBytes(byteFlag);
+//
+//            byte[] byteEnd=new byte[customMsgEnd.readableBytes()];
+//            customMsgEnd.readBytes(byteEnd);
+//
+//
+//            System.out.println("1--->"+byteFlag[0]);
+//            System.out.println("2--->"+customMsgLen);
+//            System.out.println("3--->"+customMsgChannel);
+//            System.out.println("4--->"+customMsgProtocolVersion);
+//            System.out.println("5--->"+byteEnd[0]);
+
+
+
+
+            byte[] req=new byte[customMsgBody.readableBytes()];
+            customMsgBody.readBytes(req);
+            String uuid=ctx.channel().id().asLongText();
 
 
             switch (req[0]){
@@ -121,12 +145,10 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
 //                    ctx.writeAndFlush(customMsg2);
 //                    mUICallBack.refreshText(sb.toString());
 
-
-
                     BasePackage mBasePackage=new BasePackage();
-                    mBasePackage.setCustomMsg((CustomMsg)msg);
-
-
+                    ByteBuf customMsgBody2=Unpooled.buffer(req.length);
+                    customMsgBody2.writeBytes(req);
+                    mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
                     StringBuffer sb=new StringBuffer();
                     sb.append("收到"+uuid+"指令0x01 \r\n ");
                     System.out.println("收到指令0x01");

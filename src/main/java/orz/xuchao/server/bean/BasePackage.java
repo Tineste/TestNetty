@@ -26,13 +26,13 @@ public class BasePackage {
         this.body = body;
     }
 
-    public void setCustomMsg(CustomMsg customMsg) {
-        this.flag = customMsg.getFlag();
-        this.len = customMsg.getLen();
-        this.channel = customMsg.getChannel();
-        this.protocolVersion = customMsg.getProtocolVersion();
-        this.body=customMsg.getBody();
-        this.end=customMsg.getEnd();
+    public void setCustomMsgAttribute(ByteBuf flag, Short len,byte channel, byte protocolVersion,ByteBuf body,ByteBuf end) {
+        this.flag =flag;
+        this.len = len;
+        this.channel = channel;
+        this.protocolVersion = protocolVersion;
+        this.body=body;
+        this.end=end;
 
     }
 
@@ -74,7 +74,7 @@ public class BasePackage {
         byte[] crc2=new byte[temp.readableBytes()];
         temp.readBytes(crc2);
         short checkCRC2=CRCUtil.bytesToShort(crc2);
-
+        System.out.println(crc+"   ------------   "+crc2);
         if(checkCRC1==checkCRC2){
             return true;
         }else {
@@ -128,7 +128,6 @@ public class BasePackage {
         this.end= Unpooled.buffer(2);
         this.end.writeBytes(check);
 
-        System.out.println(check[0]+"-----------------------自己运算的包尾----------------------------"+check[1]);
 
         return end;
     }

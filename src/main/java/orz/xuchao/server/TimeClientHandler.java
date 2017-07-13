@@ -86,13 +86,29 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
 
             System.out.println("-------客户端收到命令-------");
             CustomMsg customMsg = (CustomMsg)msg;
-            ByteBuf buf=customMsg.getBody();
-            byte[] req=new byte[buf.readableBytes()];
-            buf.readBytes(req);
+//            ByteBuf buf=customMsg.getBody();
+
+            ByteBuf customMsgFlag=customMsg.getFlag();
+            Short customMsgLen=customMsg.getLen();
+            byte customMsgChannel=customMsg.getChannel();
+            byte customMsgProtocolVersion=customMsg.getProtocolVersion();
+            ByteBuf customMsgEnd=customMsg.getEnd();
+            ByteBuf customMsgBody=customMsg.getBody();
+
+
+            byte[] req=new byte[customMsgBody.readableBytes()];
+            customMsgBody.readBytes(req);
+
+
             switch (req[0]){
                 case 0x01: {
                     BasePackage mBasePackage=new BasePackage();
-                    mBasePackage.setCustomMsg((CustomMsg)msg);
+
+
+
+                    ByteBuf customMsgBody2=Unpooled.buffer(req.length);
+                    customMsgBody2.writeBytes(req);
+                    mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
                     StringBuffer sb = new StringBuffer();
                     sb.append("客户收到端服务器命令0x01  \r\n");
                     System.out.println("客户收到端服务器命令0x01  ");

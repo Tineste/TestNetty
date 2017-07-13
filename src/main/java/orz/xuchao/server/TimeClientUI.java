@@ -125,7 +125,11 @@ public class TimeClientUI extends JFrame{
                 ByteBuf body=Unpooled.buffer(bbody.length);
                 body.writeBytes(bbody);
                 mBasePackage.setBody(body);
-                timeClient.socketChannel.writeAndFlush(mBasePackage.getCustomMsg());
+                CustomMsg customMsg=mBasePackage.getCustomMsg();
+
+                System.out.println("客户端发出的包，包尾是--->"+customMsg.getEnd().array()[0]+"   "+customMsg.getEnd().array()[1]);
+
+                timeClient.socketChannel.writeAndFlush(customMsg);
 
 
 
