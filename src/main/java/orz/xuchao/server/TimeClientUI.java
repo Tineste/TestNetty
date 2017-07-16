@@ -11,18 +11,26 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.*;
+import java.util.Properties;
 
 /**
  * Created by Administrator on 2017/7/5 0005.
  */
 public class TimeClientUI extends JFrame{
-//    private final JButton sendB0;
+    //    private final JButton sendB0;
     private  JButton sendB5;
     private  JButton sendB6;
     public TimeClient timeClient;
     private JTextArea receivedTF;
     private JButton sendB1,sendB2,sendB3,sendB4;
     private JLabel jl1;
+
+    private static String url="127.0.0.1";
+    private static int port=8981;
+
+
+
 //    private JTextField tv;
     UICallBack mUICallBack;
     public TimeClientUI() {
@@ -316,10 +324,7 @@ public class TimeClientUI extends JFrame{
         //        启动客户端
          timeClient=new TimeClient(mUICallBack);
         try {
-
-            timeClient.connect(8981,"127.0.0.1");
-
-
+            timeClient.connect(port,url);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -327,8 +332,42 @@ public class TimeClientUI extends JFrame{
 
     }
     public static void main(String[] args) {
+
+        try{
+//            Properties prop1 = new Properties();
+//            ///保存属性到b.properties文件
+//            FileOutputStream oFile = new FileOutputStream("c.properties", true);//true表示追加打开
+//            prop1.setProperty("port", "8981");
+//            prop1.setProperty("url", "127.0.0.1");
+//            prop1.store(oFile, "The New properties file");
+//            oFile.close();
+
+            Properties prop2 = new Properties();
+            //读取属性文件a.properties
+            InputStream in = new BufferedInputStream(new FileInputStream("c.properties"));
+            prop2.load(in);     ///加载属性列表
+
+            if(null!=prop2.getProperty("port")){
+                port = Integer.valueOf(prop2.getProperty("port"));
+                url=prop2.getProperty("url");
+
+            }
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+
+
+
+
         // 实例化对象
         TimeClientUI qq = new TimeClientUI();
+
+
 
 
 
