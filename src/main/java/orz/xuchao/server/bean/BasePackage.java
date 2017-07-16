@@ -8,6 +8,10 @@ import orz.xuchao.server.utils.CRCUtil;
  * Created by Administrator on 2017/7/13 0013.
  */
 public class BasePackage {
+
+    private static final byte[] flagB={(byte) 0xEF,0x3A};
+
+
 //    标识符
     private ByteBuf flag;
 //    长度
@@ -84,49 +88,50 @@ public class BasePackage {
 
 
     public ByteBuf getLenAndEnd() {
-//        byte[] head=this.flag.array();
-//        byte[] templen=CRCUtil.short2Bytes((short) (body.readableBytes()+4));
-//        this.len=(short) (body.readableBytes()+4);
-//        byte[] len={templen[0],templen[1]};
-//        byte[] channelAndProtocolVersion={channel,protocolVersion};
-//        byte[] data2=new byte[body.readableBytes()];
-//        body.readBytes(data2);
-//        byte[] data=new byte[head.length+len.length+channelAndProtocolVersion.length+data2.length];
-//        System.arraycopy(head, 0, data, 0, head.length);
-//        System.arraycopy(len, 0, data,head.length, len.length);
-//        System.arraycopy(channelAndProtocolVersion, 0, data, head.length+ len.length, channelAndProtocolVersion.length);
-//        System.arraycopy(data2, 0, data, head.length+ len.length+channelAndProtocolVersion.length, data2.length);
-//        int n=CRCUtil.MyCrc16Check(data);
-//        byte[] tempEdn=CRCUtil.int2Bytes(n);
-//        byte[] check = new byte[2];
-//        System.arraycopy(tempEdn, 2, check, 0, 2);
-//        this.end= Unpooled.buffer(2);
-//        this.end.writeBytes(check);
-//
-//        return end;
-        int[] head={0xEF,0x3A};
         byte[] templen=CRCUtil.short2Bytes((short) (body.readableBytes()+4));
         this.len=(short) (body.readableBytes()+4);
-        int[] len={templen[0],templen[1]};
-        int[] channelAndProtocolVersion={channel,protocolVersion};
-        int[] data2=new int[body.readableBytes()];
+        byte[] len={templen[0],templen[1]};
+        byte[] channelAndProtocolVersion={channel,protocolVersion};
+        byte[] data2=new byte[body.readableBytes()];
+        body.getBytes(0,data2);
 
-        for (int i=0;i<body.readableBytes();i++){
-            data2[i]=body.array()[i];
-        }
-
-
-        int[] data=new int[head.length+len.length+channelAndProtocolVersion.length+data2.length];
-        System.arraycopy(head, 0, data, 0, head.length);
-        System.arraycopy(len, 0, data,head.length, len.length);
-        System.arraycopy(channelAndProtocolVersion, 0, data, head.length+ len.length, channelAndProtocolVersion.length);
-        System.arraycopy(data2, 0, data, head.length+ len.length+channelAndProtocolVersion.length, data2.length);
+        byte[] data=new byte[flagB.length+len.length+channelAndProtocolVersion.length+data2.length];
+        System.arraycopy(flagB, 0, data, 0, flagB.length);
+        System.arraycopy(len, 0, data,flagB.length, len.length);
+        System.arraycopy(channelAndProtocolVersion, 0, data, flagB.length+ len.length, channelAndProtocolVersion.length);
+        System.arraycopy(data2, 0, data, flagB.length+ len.length+channelAndProtocolVersion.length, data2.length);
         int n=CRCUtil.MyCrc16Check(data);
         byte[] tempEdn=CRCUtil.int2Bytes(n);
         byte[] check = new byte[2];
         System.arraycopy(tempEdn, 2, check, 0, 2);
         this.end= Unpooled.buffer(2);
         this.end.writeBytes(check);
+//
+//        return end;
+
+
+
+
+//        byte[] templen=CRCUtil.short2Bytes((short) (body.readableBytes()+4));
+//        this.len=(short) (body.readableBytes()+4);
+//        int[] len={templen[0],templen[1]};
+//        int[] channelAndProtocolVersion={channel,protocolVersion};
+//        int[] data2=new int[body.readableBytes()];
+//
+//        for (int i=0;i<body.readableBytes();i++){
+//            data2[i]=body.array()[i];
+//        }
+//        int[] data=new int[flagB.length+len.length+channelAndProtocolVersion.length+data2.length];
+//        System.arraycopy(flagB, 0, data, 0, flagB.length);
+//        System.arraycopy(len, 0, data,flagB.length, len.length);
+//        System.arraycopy(channelAndProtocolVersion, 0, data, flagB.length+ len.length, channelAndProtocolVersion.length);
+//        System.arraycopy(data2, 0, data, flagB.length+ len.length+channelAndProtocolVersion.length, data2.length);
+//        int n=CRCUtil.MyCrc16Check(data);
+//        byte[] tempEdn=CRCUtil.int2Bytes(n);
+//        byte[] check = new byte[2];
+//        System.arraycopy(tempEdn, 2, check, 0, 2);
+//        this.end= Unpooled.buffer(2);
+//        this.end.writeBytes(check);
 
 
         return end;
