@@ -27,7 +27,7 @@ import java.util.Properties;
  * Created by Administrator on 2017/7/5 0005.
  */
 public class TimeServerUI extends JFrame{
-    private static final Logger logger = LogManager.getLogger(TimeServerUI.class.getName());
+
     private  JButton sendB7;
     private  JButton sendB4;
     private  JButton sendB5;
@@ -135,9 +135,7 @@ public class TimeServerUI extends JFrame{
             public void actionPerformed(ActionEvent e) {
                 try {
 
-                    logger.debug("输出debug级别的日志.....");
-                    logger.info("输出info级别的日志.....");
-                    logger.error("输出error级别的日志.....");
+
 
 
 

@@ -5,6 +5,8 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import orz.xuchao.server.bean.BasePackage;
 import orz.xuchao.server.bean.CustomMsg;
 import orz.xuchao.server.channelmanager.GatewayService;
@@ -21,7 +23,7 @@ import static com.oracle.jrockit.jfr.ContentType.Bytes;
  */
 public class TimeServerHandler extends ChannelInboundHandlerAdapter {
 
-
+    private static final Logger logger = LogManager.getLogger(TimeServerHandler.class.getName());
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         super.handlerRemoved(ctx);
@@ -29,6 +31,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
         GatewayService.removeGatewayChannel(uuid);
         System.out.println("设备id为"+ctx.channel().id()+"的设备断开了连接");
         mUICallBack.refreshText("\r\n设备id为"+ctx.channel().id()+"的设备断开了连接\r\n\r\n");
+        logger.info("设备id为"+ctx.channel().id()+"的设备断开了连接");
 
 
     }
@@ -48,6 +51,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
 
         System.out.println("一个客户端连接进来了："+uuid+"  目前有"+GatewayService.getChannels().size()+"个设备连入服务器 ");
         mUICallBack.refreshText("\r\n一个客户端连接进来了："+uuid+"  目前有"+GatewayService.getChannels().size()+"个设备连入服务器 \r\n\r\n");
+        logger.info("一个客户端连接进来了："+uuid+"  目前有"+GatewayService.getChannels().size()+"个设备连入服务器");
     }
 
     @Override
@@ -198,6 +202,8 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     customMsgaa.getEnd().getBytes(0,ee2);
                     System.out.println("服务器返回客户端的包，包尾是--->"+ CRCUtil.bytesToHexString(ee2));
                     ctx.writeAndFlush(customMsgaa);
+
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
                 }
                     break;
@@ -247,6 +253,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     customMsgaa.getEnd().getBytes(0,ee2);
                     System.out.println("服务器返回客户端的包，包尾是--->"+ CRCUtil.bytesToHexString(ee2));
                     ctx.writeAndFlush(customMsgaa);
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
                 }
@@ -271,6 +278,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("服务器从智能门禁读取一条UID完成");
                     sb.append("\r\n服务器从智能门禁读取一条UID完成\r\n\r\n");
                     System.out.println();
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
                 }
                 break;
@@ -295,6 +303,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("服务器写了一条UID和有效期到智能门禁指令完成");
                     sb.append("\r\n服务器写了一条UID和有效期到智能门禁指令完成\r\n\r\n");
                     System.out.println();
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
                 }
@@ -322,6 +331,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("服务器从智能门禁删除一条UID指令完成");
                     sb.append("\r\n服务器从智能门禁删除一条UID指令完成\r\n\r\n");
                     System.out.println();
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
                 }
@@ -349,6 +359,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("服务器开门指令完成");
                     sb.append("\r\n服务器开门指令完成\r\n\r\n");
                     System.out.println();
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
 
@@ -405,6 +416,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     customMsgaa.getEnd().getBytes(0,ee2);
                     System.out.println("服务器返回客户端的包，包尾是--->"+ CRCUtil.bytesToHexString(ee2));
                     ctx.writeAndFlush(customMsgaa);
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
                 }
                 break;
@@ -490,6 +502,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     customMsgaa.getEnd().getBytes(0,ee2);
                     System.out.println("服务器返回客户端的包，包尾是--->"+ CRCUtil.bytesToHexString(ee2));
                     ctx.writeAndFlush(customMsgaa);
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
 
@@ -516,6 +529,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("服务器清空智能门禁所有UID和有效期指令完成");
                     sb.append("\r\n服务器清空智能门禁所有UID和有效期指令完成\r\n\r\n");
                     System.out.println();
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
 
@@ -570,6 +584,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     customMsgaa.getEnd().getBytes(0,ee2);
                     System.out.println("服务器返回客户端的包，包尾是--->"+ CRCUtil.bytesToHexString(ee2));
                     ctx.writeAndFlush(customMsgaa);
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
                 }
@@ -653,6 +668,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     customMsgaa.getEnd().getBytes(0,ee2);
                     System.out.println("服务器返回客户端的包，包尾是--->"+ CRCUtil.bytesToHexString(ee2));
                     ctx.writeAndFlush(customMsgaa);
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
 
@@ -680,6 +696,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("服务器读取给定时间范围内开门日志指令完成");
                     sb.append("\r\n服务器读取给定时间范围内开门日志指令完成\r\n\r\n");
                     System.out.println();
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
                 }
@@ -723,6 +740,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("服务器向智能门禁发送远程升级指令完成");
                     sb.append("\r\n服务器向智能门禁发送远程升级指令完成\r\n\r\n");
                     System.out.println();
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
                 }
@@ -748,6 +766,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("服务器向智能门禁发送远程重启指令完成");
                     sb.append("\r\n服务器向智能门禁发送远程重启指令完成\r\n\r\n");
                     System.out.println();
+                    logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
                 }
