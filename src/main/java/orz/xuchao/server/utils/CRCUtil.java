@@ -1,6 +1,9 @@
 package orz.xuchao.server.utils;
 
 
+import java.util.Calendar;
+import java.util.Date;
+
 public class CRCUtil {
 
     public static int A_VALUE=0xFFFF;
@@ -100,22 +103,7 @@ public class CRCUtil {
         return value;
     }
 
-    public static int MyCrc16Check(int MyChar[]){
-        int I,J;
-        int Crc_Value=A_VALUE;
-        int My_Check;
-        for(I=0;I<MyChar.length;I++){
-            Crc_Value=Crc_Value^MyChar[I];
-            for (J=0;J<8;J++){
-                My_Check=Crc_Value&1;
-                Crc_Value=Crc_Value>>>1;
-                if(My_Check==1){
-                    Crc_Value=Crc_Value^DIV_VALUE;
-                }
-            }
-        }
-        return  Crc_Value;
-    }
+
 
     public static int MyCrc16Check(byte[] data){
         int i, j;
@@ -134,6 +122,18 @@ public class CRCUtil {
             }
         }
         return Crc_Value;
+    }
+
+
+    public static  byte[] timeToBytes(Calendar calendar) {
+
+        return CRCUtil.getTimestampBytes(calendar.getTimeInMillis() / 1000);
+    }
+    public static Date bytesToTime(byte[] time){
+        Calendar calendar = Calendar.getInstance();
+        calendar.clear();
+        calendar.setTimeInMillis(((long) CRCUtil.bytesToInt(time))*1000);
+        return calendar.getTime();
     }
 
 }

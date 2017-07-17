@@ -3,9 +3,13 @@ package orz.xuchao.server;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.socket.SocketChannel;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import orz.xuchao.server.bean.BasePackage;
 import orz.xuchao.server.bean.CustomMsg;
 import orz.xuchao.server.channelmanager.GatewayService;
 import orz.xuchao.server.uicallback.UICallBack;
+import orz.xuchao.server.utils.CRCUtil;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,7 +27,7 @@ import java.util.Properties;
  * Created by Administrator on 2017/7/5 0005.
  */
 public class TimeServerUI extends JFrame{
-
+    private static final Logger logger = LogManager.getLogger(TimeServerUI.class.getName());
     private  JButton sendB7;
     private  JButton sendB4;
     private  JButton sendB5;
@@ -100,20 +104,24 @@ public class TimeServerUI extends JFrame{
                             String key = it.next();
                             SocketChannel obj = map.get(key);
                             System.out.println("从智能门禁编号  "+key+"  读取一条UID指令 0x03");
+
+                            BasePackage mBasePackage=new BasePackage();
                             ByteBuf flag=Unpooled.buffer(2);
                             flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-                            Short len=0x0F;
-                            byte channel=0x01;
-                            byte protocolVersion=0x01;
+                            mBasePackage.setFlag(flag);
+                            mBasePackage.setChannel((byte) 0x01);
+                            mBasePackage.setProtocolVersion((byte) 0x01);
                             byte[] bbody={
                                     0x03
                                     ,0x05,0x01,0x00,0x01,0x02,0x03
                                     ,0x59,0x3D,0x34,0x11};
                             ByteBuf body=Unpooled.buffer(bbody.length);
                             body.writeBytes(bbody);
-                            ByteBuf end=Unpooled.buffer(2);
-                            end.writeBytes(new byte[]{0x59,(byte)0xB4});
-                            CustomMsg customMsg = new CustomMsg(flag, len,channel,protocolVersion,body, end);
+                            mBasePackage.setBody(body);
+                            CustomMsg customMsg=mBasePackage.getCustomMsg();
+                            byte[] ee=new byte[2];
+                            customMsg.getEnd().getBytes(0,ee);
+                            System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                             obj.writeAndFlush(customMsg);
                         }
                     } catch (Exception e1) {
@@ -126,6 +134,13 @@ public class TimeServerUI extends JFrame{
         sendB1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
+
+                    logger.debug("输出debug级别的日志.....");
+                    logger.info("输出info级别的日志.....");
+                    logger.error("输出error级别的日志.....");
+
+
+
                     Map<String, SocketChannel> map = GatewayService.getChannels();
                     Iterator<String> it = map.keySet().iterator();
 //                        无筛选向所有客户端发消息
@@ -133,23 +148,29 @@ public class TimeServerUI extends JFrame{
                         String key = it.next();
                         SocketChannel obj = map.get(key);
                         System.out.println("服务器写一条UID和有效期到编号为 "+key+" 的智能门禁指令 0x04");
+
+
+                        BasePackage mBasePackage=new BasePackage();
                         ByteBuf flag=Unpooled.buffer(2);
                         flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-                        Short len=0x1B;
-                        byte channel=0x01;
-                        byte protocolVersion=0x01;
+                        mBasePackage.setFlag(flag);
+                        mBasePackage.setChannel((byte) 0x01);
+                        mBasePackage.setProtocolVersion((byte) 0x01);
                         byte[] bbody={0x04
                                 ,0x01,0x02,0x03,0x04,0x05,0x06
                                 ,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08
                                 ,0x01,0x02,0x03,0x04
-                                ,0x01,0x02,0x03,0x04
-                        };
+                                ,0x01,0x02,0x03,0x04};
                         ByteBuf body=Unpooled.buffer(bbody.length);
                         body.writeBytes(bbody);
-                        ByteBuf end=Unpooled.buffer(2);
-                        end.writeBytes(new byte[]{0x59,(byte)0xB4});
-                        CustomMsg customMsg = new CustomMsg(flag, len,channel,protocolVersion,body, end);
+                        mBasePackage.setBody(body);
+                        CustomMsg customMsg=mBasePackage.getCustomMsg();
+                        byte[] ee=new byte[2];
+                        customMsg.getEnd().getBytes(0,ee);
+                        System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                         obj.writeAndFlush(customMsg);
+
+
                     }
                 } catch (Exception e1) {
                     e1.printStackTrace();
@@ -170,21 +191,23 @@ public class TimeServerUI extends JFrame{
                         String key = it.next();
                         SocketChannel obj = map.get(key);
                         System.out.println("服务器从编号为 "+key+" 的智能门禁删除一条UID 0x05");
+                        BasePackage mBasePackage=new BasePackage();
                         ByteBuf flag=Unpooled.buffer(2);
                         flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-                        Short len=0x17;
-                        byte channel=0x01;
-                        byte protocolVersion=0x01;
+                        mBasePackage.setFlag(flag);
+                        mBasePackage.setChannel((byte) 0x01);
+                        mBasePackage.setProtocolVersion((byte) 0x01);
                         byte[] bbody={0x05
                                 ,0x01,0x02,0x03,0x04,0x05,0x06
                                 ,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08
-                                ,0x01,0x02,0x03,0x04
-                        };
+                                ,0x01,0x02,0x03,0x04};
                         ByteBuf body=Unpooled.buffer(bbody.length);
                         body.writeBytes(bbody);
-                        ByteBuf end=Unpooled.buffer(2);
-                        end.writeBytes(new byte[]{0x59,(byte)0xB4});
-                        CustomMsg customMsg = new CustomMsg(flag, len,channel,protocolVersion,body, end);
+                        mBasePackage.setBody(body);
+                        CustomMsg customMsg=mBasePackage.getCustomMsg();
+                        byte[] ee=new byte[2];
+                        customMsg.getEnd().getBytes(0,ee);
+                        System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                         obj.writeAndFlush(customMsg);
                     }
                 } catch (Exception e1) {
@@ -205,23 +228,28 @@ public class TimeServerUI extends JFrame{
                         String key = it.next();
                         SocketChannel obj = map.get(key);
                         System.out.println("服务器给编号为"+key+"的门禁发送开门指令 0x06");
+
+                        BasePackage mBasePackage=new BasePackage();
                         ByteBuf flag=Unpooled.buffer(2);
                         flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-                        Short len=0x18;
-                        byte channel=0x01;
-                        byte protocolVersion=0x01;
+                        mBasePackage.setFlag(flag);
+                        mBasePackage.setChannel((byte) 0x01);
+                        mBasePackage.setProtocolVersion((byte) 0x01);
                         byte[] bbody={0x06
                                 ,0x01,0x02,0x03,0x04,0x05,0x06
                                 ,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08
                                 ,0x01
-                                ,0x01,0x02,0x03,0x04
-                        };
+                                ,0x01,0x02,0x03,0x04};
                         ByteBuf body=Unpooled.buffer(bbody.length);
                         body.writeBytes(bbody);
-                        ByteBuf end=Unpooled.buffer(2);
-                        end.writeBytes(new byte[]{0x59,(byte)0xB4});
-                        CustomMsg customMsg = new CustomMsg(flag, len,channel,protocolVersion,body, end);
+                        mBasePackage.setBody(body);
+                        CustomMsg customMsg=mBasePackage.getCustomMsg();
+                        byte[] ee=new byte[2];
+                        customMsg.getEnd().getBytes(0,ee);
+                        System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                         obj.writeAndFlush(customMsg);
+
+
                     }
                 } catch (Exception e1) {
                     e1.printStackTrace();
@@ -239,22 +267,26 @@ public class TimeServerUI extends JFrame{
                     while (it.hasNext()) {
                         String key = it.next();
                         SocketChannel obj = map.get(key);
-                        System.out.println(" 服务器清空编号为"+0x09+"智能门禁所有UID和有效期指令0x09");
+                        System.out.println(" 服务器清空编号为"+key+"智能门禁所有UID和有效期指令0x09");
+
+
+
+                        BasePackage mBasePackage=new BasePackage();
                         ByteBuf flag=Unpooled.buffer(2);
                         flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-                        Short len=0x0F;
-                        byte channel=0x01;
-                        byte protocolVersion=0x01;
-                        byte[] bbody={
-                                0x09
+                        mBasePackage.setFlag(flag);
+                        mBasePackage.setChannel((byte) 0x01);
+                        mBasePackage.setProtocolVersion((byte) 0x01);
+                        byte[] bbody={  0x09
                                 ,0x01,0x02,0x03,0x04,0x05,0x06
-                                ,0x01,0x02,0x03,0x04
-                        };
+                                ,0x01,0x02,0x03,0x04};
                         ByteBuf body=Unpooled.buffer(bbody.length);
                         body.writeBytes(bbody);
-                        ByteBuf end=Unpooled.buffer(2);
-                        end.writeBytes(new byte[]{0x59,(byte)0xB4});
-                        CustomMsg customMsg = new CustomMsg(flag, len,channel,protocolVersion,body, end);
+                        mBasePackage.setBody(body);
+                        CustomMsg customMsg=mBasePackage.getCustomMsg();
+                        byte[] ee=new byte[2];
+                        customMsg.getEnd().getBytes(0,ee);
+                        System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                         obj.writeAndFlush(customMsg);
                     }
                 } catch (Exception e1) {
@@ -274,26 +306,29 @@ public class TimeServerUI extends JFrame{
                         String key = it.next();
                         SocketChannel obj = map.get(key);
                         System.out.println("服务器读取编号为"+key+"给定时间范围内开门日志 0x0C");
-//                建立通道后就开始持续向服务器发送心跳包
-                        ByteBuf flag = Unpooled.buffer(2);
-                        flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
-                        Short len = 0x19;
-                        byte channel = 0x11;
-                        byte protocolVersion = 0x01;
-                        byte[] bbody = {
-                                0x0C,
+
+
+                        BasePackage mBasePackage=new BasePackage();
+                        ByteBuf flag=Unpooled.buffer(2);
+                        flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                        mBasePackage.setFlag(flag);
+                        mBasePackage.setChannel((byte) 0x01);
+                        mBasePackage.setProtocolVersion((byte) 0x01);
+                        byte[] bbody={  0x0C,
                                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
                                 0x01, 0x02, 0x03, 0x04,
                                 0x01, 0x02, 0x03, 0x04,
                                 0x01, 0x02,
-                                0x01, 0x02, 0x03, 0x04,
-                        };
-                        ByteBuf body = Unpooled.buffer(bbody.length);
+                                0x01, 0x02, 0x03, 0x04};
+                        ByteBuf body=Unpooled.buffer(bbody.length);
                         body.writeBytes(bbody);
-                        ByteBuf end = Unpooled.buffer(2);
-                        end.writeBytes(new byte[]{0x6F, (byte) 0x6B});
-                        CustomMsg customMsg = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                        mBasePackage.setBody(body);
+                        CustomMsg customMsg=mBasePackage.getCustomMsg();
+                        byte[] ee=new byte[2];
+                        customMsg.getEnd().getBytes(0,ee);
+                        System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                         obj.writeAndFlush(customMsg);
+
                     }
                 } catch (Exception e1) {
                     e1.printStackTrace();
@@ -312,12 +347,12 @@ public class TimeServerUI extends JFrame{
                         String key = it.next();
                         SocketChannel obj = map.get(key);
                         System.out.println(" 服务器向编号为"+key+"智能门禁发送远程升级指令 0x0D");
-                        ByteBuf flag = Unpooled.buffer(2);
-                        flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
-                        System.out.println("预计长度为===>"+0xDB);
-                        Short len=0xDB;
-                        byte channel = 0x11;
-                        byte protocolVersion = 0x01;
+                        BasePackage mBasePackage=new BasePackage();
+                        ByteBuf flag=Unpooled.buffer(2);
+                        flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                        mBasePackage.setFlag(flag);
+                        mBasePackage.setChannel((byte) 0x01);
+                        mBasePackage.setProtocolVersion((byte) 0x01);
                         byte[] byte1 = {
                                 0x0D,
                                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
@@ -334,11 +369,13 @@ public class TimeServerUI extends JFrame{
                         System.arraycopy(byte2, 0, data, byte1.length + url.length, byte2.length);
                         ByteBuf body = Unpooled.buffer(data.length);
                         body.writeBytes(data);
-                        ByteBuf end = Unpooled.buffer(2);
-                        end.writeBytes(new byte[]{0x2D, (byte) 0x6E});
-                        System.out.println("实际长度为===>"+(data.length+4));
-                        CustomMsg customMsg = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                        mBasePackage.setBody(body);
+                        CustomMsg customMsg=mBasePackage.getCustomMsg();
+                        byte[] ee=new byte[2];
+                        customMsg.getEnd().getBytes(0,ee);
+                        System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                         obj.writeAndFlush(customMsg);
+
                     }
                 } catch (Exception e1) {
                     e1.printStackTrace();
@@ -357,23 +394,25 @@ public class TimeServerUI extends JFrame{
                         String key = it.next();
                         SocketChannel obj = map.get(key);
                         System.out.println("服务器向编号为"+key+"智能门禁发送远程重启指令 0x0E");
-//                建立通道后就开始持续向服务器发送心跳包
-                        ByteBuf flag = Unpooled.buffer(2);
-                        flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
-                        Short len = 0x0F;
-                        byte channel = 0x11;
-                        byte protocolVersion = 0x01;
-                        byte[] bbody = {
-                                0x0E,
+
+                        BasePackage mBasePackage=new BasePackage();
+                        ByteBuf flag=Unpooled.buffer(2);
+                        flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                        mBasePackage.setFlag(flag);
+                        mBasePackage.setChannel((byte) 0x01);
+                        mBasePackage.setProtocolVersion((byte) 0x01);
+                        byte[] bbody={   0x0E,
                                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                                0x01, 0x02, 0x03, 0x04,
-                        };
-                        ByteBuf body = Unpooled.buffer(bbody.length);
+                                0x01, 0x02, 0x03, 0x04};
+                        ByteBuf body=Unpooled.buffer(bbody.length);
                         body.writeBytes(bbody);
-                        ByteBuf end = Unpooled.buffer(2);
-                        end.writeBytes(new byte[]{0x6F, (byte) 0x6B});
-                        CustomMsg customMsg = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                        mBasePackage.setBody(body);
+                        CustomMsg customMsg=mBasePackage.getCustomMsg();
+                        byte[] ee=new byte[2];
+                        customMsg.getEnd().getBytes(0,ee);
+                        System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                         obj.writeAndFlush(customMsg);
+
                     }
                 } catch (Exception e1) {
                     e1.printStackTrace();

@@ -6,12 +6,14 @@ import orz.xuchao.server.bean.BasePackage;
 import orz.xuchao.server.bean.clientsends.GetURLAndIP;
 import orz.xuchao.server.bean.CustomMsg;
 import orz.xuchao.server.uicallback.UICallBack;
+import orz.xuchao.server.utils.CRCUtil;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.util.Calendar;
 import java.util.Properties;
 
 /**
@@ -26,6 +28,7 @@ public class TimeClientUI extends JFrame{
     private JButton sendB1,sendB2,sendB3,sendB4;
     private JLabel jl1;
 
+//    private static String url="183.131.66.171";
     private static String url="127.0.0.1";
     private static int port=8981;
 
@@ -98,56 +101,35 @@ public class TimeClientUI extends JFrame{
         sendB1.setBounds(50, 40, 500, 20);
         sendB1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-//                System.out.println(" 从中心服务器 获取具体要链接的前置服务器域名或IP");
-////                开始标识
-//                ByteBuf flag=Unpooled.buffer(2);
-//                flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-////                长度
-//                Short len=0x0F;
-////                信道
-//                byte channel=0x01;
-////                协议版本
-//                byte protocolVersion=0x01;
-////                包体
-//                byte[] bbody={0x01
-//                        ,0x05,0x01,0x00,0x01,0x02,0x03
-//                        ,0x59,0x3D,0x34,0x11};
-//                ByteBuf body=Unpooled.buffer(bbody.length);
-//                body.writeBytes(bbody);
-////                包尾
-//                ByteBuf end=Unpooled.buffer(2);
-//                end.writeBytes(new byte[]{0x51,(byte)0xC7});
-//                CustomMsg customMsg = new CustomMsg(flag, len,channel,protocolVersion,body, end);
-//                timeClient.socketChannel.writeAndFlush(customMsg);
-
-
                 BasePackage mBasePackage=new BasePackage();
                 ByteBuf flag=Unpooled.buffer(2);
                 flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
                 mBasePackage.setFlag(flag);
                 mBasePackage.setChannel((byte) 0x01);
                 mBasePackage.setProtocolVersion((byte) 0x01);
-                byte[] bbody={0x01
-                        ,0x05,0x01,0x00,0x01,0x02,0x03
-                        ,0x59,0x3D,0x34,0x11};
+//                byte[] bbody={0x01
+//                        ,0x06,0x05, 0x04,0x03, 0x02,0x01
+//                        ,0x59,0x6C,0x3F, (byte) 0xD7};
+
+                byte[] orlder={0x01};
+                byte[] mac ={0x08,0x06, 0x00,0x00, 0x00,0x01};
+                Calendar calendar = Calendar.getInstance();
+                byte[] time=CRCUtil.timeToBytes(calendar);
+                byte[] bbody=new byte[orlder.length+mac.length+time.length];
+
+                System.arraycopy(orlder, 0, bbody, 0, orlder.length);
+                System.arraycopy(mac, 0, bbody, orlder.length, mac.length);
+                System.arraycopy(time, 0, bbody, orlder.length + mac.length, time.length);
+
+
                 ByteBuf body=Unpooled.buffer(bbody.length);
                 body.writeBytes(bbody);
                 mBasePackage.setBody(body);
                 CustomMsg customMsg=mBasePackage.getCustomMsg();
-
                 byte[] ee=new byte[2];
                 customMsg.getEnd().getBytes(0,ee);
-                System.out.println("客户端发出的包，包尾是--->"+ee[0]+"   "+ee[1]);
-
-                byte[] ee2=new byte[2];
-                customMsg.getEnd().getBytes(0,ee2);
-                System.out.println("客户端发出的包，包尾是--->"+ee2[0]+"   "+ee2[1]);
-
+                System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                 timeClient.socketChannel.writeAndFlush(customMsg);
-
-
-
-
 
             }
         });
@@ -156,28 +138,25 @@ public class TimeClientUI extends JFrame{
         sendB2.setBounds(50, 70, 500, 20);
         sendB2.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println("智能门禁向服务器申报MAC码并获取蓝牙密钥 ");
-//                开始标识
+                BasePackage mBasePackage=new BasePackage();
                 ByteBuf flag=Unpooled.buffer(2);
                 flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-//                长度
-                Short len=0x0F;
-
-//                信道
-                byte channel=0x01;
-//                协议版本
-                byte protocolVersion=0x01;
-//                包体
+                mBasePackage.setFlag(flag);
+                mBasePackage.setChannel((byte) 0x01);
+                mBasePackage.setProtocolVersion((byte) 0x01);
                 byte[] bbody={0x02
                         ,0x05,0x01,0x00,0x01,0x02,0x03
                         ,0x59,0x3D,0x34,0x11};
                 ByteBuf body=Unpooled.buffer(bbody.length);
                 body.writeBytes(bbody);
-//                包尾
-                ByteBuf end=Unpooled.buffer(2);
-                end.writeBytes(new byte[]{0x51,(byte)0xC7});
-                CustomMsg customMsg = new CustomMsg(flag, len,channel,protocolVersion,body, end);
+                mBasePackage.setBody(body);
+                CustomMsg customMsg=mBasePackage.getCustomMsg();
+                byte[] ee=new byte[2];
+                customMsg.getEnd().getBytes(0,ee);
+                System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                 timeClient.socketChannel.writeAndFlush(customMsg);
+
+
             }
         });
 
@@ -185,19 +164,12 @@ public class TimeClientUI extends JFrame{
         sendB3.setBounds(50, 100, 500, 20);
         sendB3.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println("开门信息上报到服务器指令");
-//                开始标识
+                BasePackage mBasePackage=new BasePackage();
                 ByteBuf flag=Unpooled.buffer(2);
                 flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-//                长度
-                Short len=0x18;
-                System.out.println(len+"<=======");
-
-//                信道
-                byte channel=0x01;
-//                协议版本
-                byte protocolVersion=0x01;
-//                包体
+                mBasePackage.setFlag(flag);
+                mBasePackage.setChannel((byte) 0x01);
+                mBasePackage.setProtocolVersion((byte) 0x01);
                 byte[] bbody={
                         0x07
                         ,0x01,0x02,0x03,0x04,0x05,0x06
@@ -206,10 +178,11 @@ public class TimeClientUI extends JFrame{
                         ,0x59,0x3D,0x34,0x11};
                 ByteBuf body=Unpooled.buffer(bbody.length);
                 body.writeBytes(bbody);
-//                包尾
-                ByteBuf end=Unpooled.buffer(2);
-                end.writeBytes(new byte[]{0x51,(byte)0xC7});
-                CustomMsg customMsg = new CustomMsg(flag, len,channel,protocolVersion,body, end);
+                mBasePackage.setBody(body);
+                CustomMsg customMsg=mBasePackage.getCustomMsg();
+                byte[] ee=new byte[2];
+                customMsg.getEnd().getBytes(0,ee);
+                System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                 timeClient.socketChannel.writeAndFlush(customMsg);
             }
         });
@@ -221,24 +194,29 @@ public class TimeClientUI extends JFrame{
         sendB4.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("时间校准指令上报到服务器");
-//                建立通道后就开始持续向服务器发送心跳包
-                ByteBuf flag = Unpooled.buffer(2);
-                flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
-                Short len = 0x0F;
-                byte channel = 0x11;
-                byte protocolVersion = 0x01;
-                byte[] bbody = {
+
+                BasePackage mBasePackage=new BasePackage();
+                ByteBuf flag=Unpooled.buffer(2);
+                flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                mBasePackage.setFlag(flag);
+                mBasePackage.setChannel((byte) 0x01);
+                mBasePackage.setProtocolVersion((byte) 0x01);
+                byte[] bbody={
                         0x0A,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
                         0x01, 0x02, 0x03, 0x04
                 };
-                ByteBuf body = Unpooled.buffer(bbody.length);
+                ByteBuf body=Unpooled.buffer(bbody.length);
                 body.writeBytes(bbody);
-                ByteBuf end = Unpooled.buffer(2);
-                end.writeBytes(new byte[]{0x6F, (byte) 0x6B});
-                CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                mBasePackage.setBody(body);
+                CustomMsg customMsg=mBasePackage.getCustomMsg();
+                byte[] ee=new byte[2];
+                customMsg.getEnd().getBytes(0,ee);
+                System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
+                timeClient.socketChannel.writeAndFlush(customMsg);
 
-                timeClient.socketChannel.writeAndFlush(customMsg2);
+
+
             }
         });
 
@@ -246,26 +224,32 @@ public class TimeClientUI extends JFrame{
         sendB5.setBounds(50, 160, 500, 20);
         sendB5.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+
+
                 System.out.println("手动心跳包指令上报到服务器");
-//                建立通道后就开始持续向服务器发送心跳包
-                ByteBuf flag = Unpooled.buffer(2);
-                flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
-                Short len = 0x10;
-                byte channel = 0x11;
-                byte protocolVersion = 0x01;
-                byte[] bbody = {
+                BasePackage mBasePackage=new BasePackage();
+                ByteBuf flag=Unpooled.buffer(2);
+                flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                mBasePackage.setFlag(flag);
+                mBasePackage.setChannel((byte) 0x01);
+                mBasePackage.setProtocolVersion((byte) 0x01);
+                byte[] bbody={
                         0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
                         0x01,
-                        0x01, 0x02, 0x03, 0x04,
+                        0x01, 0x02, 0x03, 0x04
                 };
-                ByteBuf body = Unpooled.buffer(bbody.length);
+                ByteBuf body=Unpooled.buffer(bbody.length);
                 body.writeBytes(bbody);
-                ByteBuf end = Unpooled.buffer(2);
-                end.writeBytes(new byte[]{0x6F, (byte) 0x6B});
-                CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                mBasePackage.setBody(body);
+                CustomMsg customMsg=mBasePackage.getCustomMsg();
+                byte[] ee=new byte[2];
+                customMsg.getEnd().getBytes(0,ee);
+                System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
+                timeClient.socketChannel.writeAndFlush(customMsg);
 
-                timeClient.socketChannel.writeAndFlush(customMsg2);
+
+
             }
         });
 
@@ -273,26 +257,33 @@ public class TimeClientUI extends JFrame{
         sendB6.setBounds(50, 190, 500, 20);
         sendB6.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+
+
+
                 System.out.println("报警信息上报到服务器指令");
-//                建立通道后就开始持续向服务器发送心跳包
-                ByteBuf flag = Unpooled.buffer(2);
-                flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
-                Short len = 0x10;
-                byte channel = 0x11;
-                byte protocolVersion = 0x01;
-                byte[] bbody = {
+                BasePackage mBasePackage=new BasePackage();
+                ByteBuf flag=Unpooled.buffer(2);
+                flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                mBasePackage.setFlag(flag);
+                mBasePackage.setChannel((byte) 0x01);
+                mBasePackage.setProtocolVersion((byte) 0x01);
+                byte[] bbody={
                         0x0B,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
                         0x01,
                         0x01, 0x02, 0x03, 0x04,
                 };
-                ByteBuf body = Unpooled.buffer(bbody.length);
+                ByteBuf body=Unpooled.buffer(bbody.length);
                 body.writeBytes(bbody);
-                ByteBuf end = Unpooled.buffer(2);
-                end.writeBytes(new byte[]{0x6F, (byte) 0x6B});
-                CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
+                mBasePackage.setBody(body);
+                CustomMsg customMsg=mBasePackage.getCustomMsg();
+                byte[] ee=new byte[2];
+                customMsg.getEnd().getBytes(0,ee);
+                System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
+                timeClient.socketChannel.writeAndFlush(customMsg);
 
-                timeClient.socketChannel.writeAndFlush(customMsg2);
+
+
             }
         });
 
