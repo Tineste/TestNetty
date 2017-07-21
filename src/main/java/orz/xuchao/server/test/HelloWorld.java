@@ -1,6 +1,8 @@
-package orz.xuchao.server;
+package orz.xuchao.server.test;
 
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,9 +21,74 @@ public class HelloWorld {
 
 
     public static void main(String[] args)throws  Exception {
-        HelloWorld mHelloWorld=new HelloWorld();
-        mHelloWorld.logout();
+//        HelloWorld mHelloWorld=new HelloWorld();
+//        mHelloWorld.logout();
 
+//        byte[] orlder={0x02};
+//        byte[] result={0x01};
+//        byte[] blueSecret={0x01, 0x01, 0x02, 0x02, 0x03, 0x03};
+//        ByteBuf body=Unpooled.copiedBuffer(orlder,mac,time,blueSecret,result);
+
+        String s="{\n" +
+                "\"a\": \"哈哈\", \n" +
+                "\"b\": \"阿达是广大\"}";
+
+//        System.out.println(s);
+        byte[] b=s.getBytes("utf-8");
+        byte[] b1={0x00,0x00,0x00};
+
+        byte[] b2=new byte[b.length+b1.length];
+
+        System.arraycopy(b, 0, b2, 0, b.length);
+        System.arraycopy(b1, 0, b2, b.length, b1.length);
+        String str=new String(b2);
+        System.out.println(">"+str);
+
+
+//        System.out.println(CRCUtil.bytesToHexString(b));
+
+        String s2 = new String(b);//bytep[]转换为String
+//        System.out.println(s2);
+
+
+
+
+
+//        MyChannelTemp myChannel1=new MyChannelTemp();
+//        myChannel1.setId("01");
+//        myChannel1.setMac("11111");
+//        myChannel1.setChannel("AAAAAAA");
+//
+//        MyChannelTemp myChannel2=new MyChannelTemp();
+//        myChannel2.setId("02");
+//        myChannel2.setMac("22222");
+//        myChannel2.setChannel("BBBBB");
+//
+//        MyChannelTemp myChannel3=new MyChannelTemp();
+//        myChannel3.setId("03");
+//        myChannel3.setMac("33333");
+//        myChannel3.setChannel("CCCCC");
+//        ArrayList<MyChannelTemp> arrayList=new ArrayList<MyChannelTemp>();
+//        arrayList.add(myChannel1);
+//        arrayList.add(myChannel2);
+//        arrayList.add(myChannel3);
+//
+//        for (MyChannelTemp m:arrayList) {
+//            if (m.getId().equals("01"))
+//                m.setMac("1");
+//        }
+//        System.out.println(arrayList.get(0).getMac());
+//        System.out.println(arrayList.get(1).getMac());
+//        System.out.println(arrayList.get(2).getMac());
+//
+//
+//        for (MyChannelTemp m:arrayList) {
+//            if (m.getId().equals("02"))
+//                arrayList.remove(m);
+//        }
+//        for (MyChannelTemp m:arrayList) {
+//            System.out.println(m.getId());
+//        }
 
 //        {
 //            byte[] bbb={

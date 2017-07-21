@@ -1,4 +1,4 @@
-package orz.xuchao.server;
+package orz.xuchao.server.lock;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -6,25 +6,27 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import orz.xuchao.server.bean.BasePackage;
 import orz.xuchao.server.bean.CustomMsg;
+import orz.xuchao.server.uicallback.ChanageUserverCallBack;
 import orz.xuchao.server.uicallback.UICallBack;
 import orz.xuchao.server.utils.CRCUtil;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.logging.Logger;
 
 
 /**
  * Created by Administrator on 2017/7/6 0006.
  */
-public class TimeClientHandler extends ChannelInboundHandlerAdapter {
+public class LockClientHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger logger=Logger.getLogger(TimeClientHandler.class.getName());
+    private static final Logger logger=Logger.getLogger(LockClientHandler.class.getName());
     private UICallBack mUICallBack;
+    private ChanageUserverCallBack mChanageUserverCallBack;
 
 
-    public TimeClientHandler(UICallBack mUICallBack){
+    public LockClientHandler(UICallBack mUICallBack, ChanageUserverCallBack mChanageUserverCallBack){
         this.mUICallBack = mUICallBack;
+        this.mChanageUserverCallBack=mChanageUserverCallBack;
+
     }
 
     @Override
@@ -122,10 +124,9 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
                         sb.append("CRC验证失败！\r\n");
                     }
 
-
-
                     sb.append(CRCUtil.bytesToHexString(req)+".");
                     System.out.println("...");
+
 
 
                     byte[] mac = new byte[6];
@@ -134,12 +135,22 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
                     System.arraycopy(req, 209, time, 0, 4);
                     CRCUtil.bytesToHexString(time);
 
+                    byte[] url=new byte[200];
+                    System.arraycopy(req, 7, url, 0, 200);
+                    byte[] port=new byte[2];
+                    System.arraycopy(req, 207, port, 0, 2);
+                    String newPort=""+port[0]+port[1];
+
+
                     sb.append("\r\n"+"mac地址是："+CRCUtil.bytesToHexString(mac)+"\r\n");
                     sb.append("服务器端返回的时间是："+CRCUtil.bytesToTime(time)+"\r\n");
 
+                    sb.append("服务器端返回url是："+ new String(url)+"   端口是"+newPort+"\r\n");
+                    System.out.println("服务器端返回url是："+ new String(url)+"   端口是"+newPort+"\r\n");
                     System.out.println("从中心服务器获取具体要链接的前置服务器域名或IP 完成");
-                    sb.append("从中心服务器获取具体要链接的前置服务器域名或IP 完成\r\n\r\n");
+                    sb.append("从中心服务器获取具体要链接的前置服务器域名"+new String(url)+"端口："+newPort+" 完成\r\n\r\n");
                     System.out.println();
+                    mChanageUserverCallBack.chanageServer(new String(url),Integer.valueOf(newPort));
                     mUICallBack.refreshText(sb.toString());
                 }
 
@@ -398,15 +409,23 @@ public class TimeClientHandler extends ChannelInboundHandlerAdapter {
                     mBasePackage2.setFlag(flag);
                     mBasePackage2.setChannel((byte) 0x11);
                     mBasePackage2.setProtocolVersion((byte) 0x01);
-                    byte[] data = {0x06,
-                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                            0x01,
-                            0x01,0x02,0x03,0x04,
-                            0x01
-                    };
-                    ByteBuf body=Unpooled.buffer(data.length);
-                    body.writeBytes(data);
+//                    byte[] data = {0x06,
+//                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+//                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+//                            0x01,
+//                            0x01,0x02,0x03,0x04,
+//                            0x01
+//                    };
+//                    ByteBuf body=Unpooled.buffer(data.length);
+//                    body.writeBytes(data);
+
+
+                    byte[] resoult={0x01};
+                    ByteBuf body=Unpooled.copiedBuffer(req,resoult);
+
+
+
+
                     mBasePackage2.setBody(body);
                     CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
                     byte[] ee2=new byte[2];

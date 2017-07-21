@@ -1,4 +1,9 @@
-package orz.xuchao.server.channelmanager;
+package orz.xuchao.server.apiserverclient;
+
+/**
+ * Created by Administrator on 2017/7/20 0020.
+ */
+
 
 import io.netty.channel.socket.SocketChannel;
 
@@ -8,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by Administrator on 2017/7/6 0006.
  */
-public class GatewayService {
+public class ShuntGatewayService {
 
     private static Map<String, SocketChannel> map = new ConcurrentHashMap();
 

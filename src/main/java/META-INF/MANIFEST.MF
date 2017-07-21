@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: C:\Users\Administrator\.m2\repository
-Main-Class: orz.xuchao.server.TimeServerUI
-

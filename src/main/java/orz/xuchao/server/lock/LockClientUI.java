@@ -1,10 +1,10 @@
-package orz.xuchao.server;
+package orz.xuchao.server.lock;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import orz.xuchao.server.bean.BasePackage;
-import orz.xuchao.server.bean.clientsends.GetURLAndIP;
 import orz.xuchao.server.bean.CustomMsg;
+import orz.xuchao.server.uicallback.ChanageUserverCallBack;
 import orz.xuchao.server.uicallback.UICallBack;
 import orz.xuchao.server.utils.CRCUtil;
 
@@ -19,11 +19,11 @@ import java.util.Properties;
 /**
  * Created by Administrator on 2017/7/5 0005.
  */
-public class TimeClientUI extends JFrame{
+public class LockClientUI extends JFrame{
     //    private final JButton sendB0;
     private  JButton sendB5;
     private  JButton sendB6;
-    public TimeClient timeClient;
+    public LockTimeClient timeClient;
     private JTextArea receivedTF;
     private JButton sendB1,sendB2,sendB3,sendB4;
     private JLabel jl1;
@@ -36,7 +36,10 @@ public class TimeClientUI extends JFrame{
 
 //    private JTextField tv;
     UICallBack mUICallBack;
-    public TimeClientUI() {
+
+
+    ChanageUserverCallBack mChanageUserverCallBack;
+    public LockClientUI() {
         this.setTitle("客户端");
         this.setBounds(0, 0, 600, 800);
         // 窗体大小不能改变
@@ -145,7 +148,7 @@ public class TimeClientUI extends JFrame{
                 mBasePackage.setChannel((byte) 0x01);
                 mBasePackage.setProtocolVersion((byte) 0x01);
                 byte[] bbody={0x02
-                        ,0x05,0x01,0x00,0x01,0x02,0x03
+                        ,0x01,0x02,0x03,0x04,0x05,0x06
                         ,0x59,0x3D,0x34,0x11};
                 ByteBuf body=Unpooled.buffer(bbody.length);
                 body.writeBytes(bbody);
@@ -292,7 +295,7 @@ public class TimeClientUI extends JFrame{
         jl1 = new JLabel();
         jl1.setBounds(0, 0, 355, 265);
 
-        jl1.add(sendB1);
+//        jl1.add(sendB1);
 //        jl1.add(tv);
 //        jl1.add(sendB0);
         jl1.add(sendB2);
@@ -314,8 +317,23 @@ public class TimeClientUI extends JFrame{
             }
         };
 
+
+        mChanageUserverCallBack= new ChanageUserverCallBack() {
+
+
+            public void chanageServer(String url, int port) {
+                try {
+                    System.out.println("准备重新连接新服务器---");
+                    timeClient.reConnect(port,url);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+
         //        启动客户端
-         timeClient=new TimeClient(mUICallBack);
+         timeClient=new LockTimeClient(mUICallBack,mChanageUserverCallBack);
         try {
             timeClient.connect(port,url);
         } catch (Exception e) {
@@ -358,7 +376,7 @@ public class TimeClientUI extends JFrame{
 
 
         // 实例化对象
-        TimeClientUI qq = new TimeClientUI();
+        LockClientUI qq = new LockClientUI();
 
 
 

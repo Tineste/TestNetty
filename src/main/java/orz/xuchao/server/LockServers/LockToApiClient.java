@@ -1,4 +1,4 @@
-package orz.xuchao.server;
+package orz.xuchao.server.LockServers;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -10,18 +10,20 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import orz.xuchao.server.bean.BasePackage;
 import orz.xuchao.server.bean.CustomMsg;
 import orz.xuchao.server.code.CustomDecoder;
 import orz.xuchao.server.code.CustomEncoder;
+import orz.xuchao.server.uicallback.ChanageUserverCallBack;
 import orz.xuchao.server.uicallback.UICallBack;
+import orz.xuchao.server.utils.CRCUtil;
 
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.Calendar;
 
 /**
  * Created by Administrator on 2017/7/6 0006.
  */
-public class TimeClient {
+public class LockToApiClient {
 
     public SocketChannel socketChannel;
     private static final int MAX_FRAME_LENGTH = 1024 * 1024;
@@ -29,20 +31,22 @@ public class TimeClient {
     private static final int LENGTH_FIELD_OFFSET = 2;
     private static final int LENGTH_ADJUSTMENT = 0;
     private static final int INITIAL_BYTES_TO_STRIP = 0;
-    private UICallBack mUICallBack;
+//    private UICallBack mUICallBack;
 
 
-
-    public TimeClient(UICallBack mUICallBack){
-        this.mUICallBack = mUICallBack;
-    }
+    Bootstrap b;
+    EventLoopGroup group;
+    ChannelFuture f;
+//    public LockToApiClient(UICallBack mUICallBack){
+//        this.mUICallBack = mUICallBack;
+//    }
 
 
 
     public void connect(int port ,String host)throws Exception{
-        EventLoopGroup group=new NioEventLoopGroup();
+        group=new NioEventLoopGroup();
         try {
-            Bootstrap b=new Bootstrap();
+            b=new Bootstrap();
             b.group(group).channel(NioSocketChannel.class)
                     .option(ChannelOption.TCP_NODELAY,true)
                     .handler(new ChannelInitializer<SocketChannel>() {
@@ -51,37 +55,37 @@ public class TimeClient {
 //                            socketChannel.pipeline().addLast(new StringDecoder());
                             socketChannel.pipeline().addLast(new CustomDecoder(MAX_FRAME_LENGTH,LENGTH_FIELD_LENGTH,LENGTH_FIELD_OFFSET,LENGTH_ADJUSTMENT,INITIAL_BYTES_TO_STRIP,false));
                             socketChannel.pipeline().addLast(new CustomEncoder());
-                            socketChannel.pipeline().addLast(new TimeClientHandler(mUICallBack));
+                            socketChannel.pipeline().addLast(new LockToApiHandler());
 
                         }
                     });
-            ChannelFuture f=b.connect(host,port).sync();
+            f=b.connect(host,port).sync();
             if(f.isSuccess()){
                 socketChannel=(SocketChannel)f.channel();
-//                建立通道后就开始持续向服务器发送心跳包
-//                Timer tme =new Timer("心跳包");
-//                tme.schedule(new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        ByteBuf flag = Unpooled.buffer(2);
-//                        flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
-//                        Short len = 0x10;
-//                        byte channel = 0x11;
-//                        byte protocolVersion = 0x01;
-//                        byte[] bbody = {
-//                                0x08,
-//                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-//                                0x01,
-//                                0x01, 0x02, 0x03, 0x04,
-//                        };
-//                        ByteBuf body = Unpooled.buffer(bbody.length);
-//                        body.writeBytes(bbody);
-//                        ByteBuf end = Unpooled.buffer(2);
-//                        end.writeBytes(new byte[]{0x6F, (byte) 0x6B});
-//                        CustomMsg customMsg2 = new CustomMsg(flag, len, channel, protocolVersion, body, end);
-//                        socketChannel.writeAndFlush(customMsg2);
-//                    }
-//                },1000,5*1000*60);
+
+
+                BasePackage mBasePackage2=new BasePackage();
+                ByteBuf flag=Unpooled.buffer(2);
+                flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                mBasePackage2.setFlag(flag);
+                mBasePackage2.setChannel((byte) 0x11);
+                mBasePackage2.setProtocolVersion((byte) 0x01);
+                byte[] orlder={0x21};
+                byte[] lockMac={0x1,0x02,0x03,0x04,0x05,0x06};
+                byte[] serverMac={0x6,0x05,0x04,0x03,0x02,0x01};
+                byte[] time={0x01,0x02,0x03,0x04};
+
+
+                ByteBuf byteBuf=Unpooled.copiedBuffer(orlder,lockMac,serverMac,time);
+
+                mBasePackage2.setBody(byteBuf);
+                CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
+                byte[] ee2=new byte[2];
+                customMsgaa.getEnd().getBytes(0,ee2);
+                System.out.println("服务器返回客户端的包，包尾是--->"+ CRCUtil.bytesToHexString(ee2));
+                socketChannel.writeAndFlush(customMsgaa);
+
+
             }
 //            f.channel().closeFuture();
         }finally {
@@ -89,5 +93,17 @@ public class TimeClient {
         }
     }
 
+
+    public static void main(String[] args) {
+        int apiPort = 8981;
+        String apiURL = "127.0.0.1";
+        //        启动客户端
+        LockToApiClient timeClient=new LockToApiClient();
+        try {
+            timeClient.connect(apiPort,apiURL);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

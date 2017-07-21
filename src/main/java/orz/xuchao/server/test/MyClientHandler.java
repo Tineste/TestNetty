@@ -1,4 +1,4 @@
-package orz.xuchao.server;
+package orz.xuchao.server.test;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

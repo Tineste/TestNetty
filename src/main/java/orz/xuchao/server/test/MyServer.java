@@ -1,4 +1,4 @@
-package orz.xuchao.server;
+package orz.xuchao.server.test;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;

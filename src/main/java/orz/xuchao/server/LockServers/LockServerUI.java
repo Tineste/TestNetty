@@ -1,13 +1,10 @@
-package orz.xuchao.server;
+package orz.xuchao.server.LockServers;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.socket.SocketChannel;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import orz.xuchao.server.bean.BasePackage;
 import orz.xuchao.server.bean.CustomMsg;
-import orz.xuchao.server.channelmanager.GatewayService;
 import orz.xuchao.server.uicallback.UICallBack;
 import orz.xuchao.server.utils.CRCUtil;
 
@@ -17,7 +14,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.Map;
@@ -26,23 +22,28 @@ import java.util.Properties;
 /**
  * Created by Administrator on 2017/7/5 0005.
  */
-public class TimeServerUI extends JFrame{
+public class LockServerUI extends JFrame{
 
+    public static   LockToApiClient timeClient;
     private  JButton sendB7;
     private  JButton sendB4;
     private  JButton sendB5;
     private  JButton sendB6;
-    private TimeServer mTimeServer;
+    private LockServer mTimeServer;
     private JTextArea receivedTF;
     private JButton sendB,sendB1,sendB2,sendB3;
     private JLabel jl1;
     private UICallBack mUICallBack;
 
     private int port;
+    private int apiPort;
+    private String apiURL;
 
 
-    public TimeServerUI(int port) {
+    public LockServerUI(int port, int apiPort, String apiURL) {
         this.port=port;
+        this.apiPort=apiPort;
+        this.apiURL=apiURL;
         this.setTitle("服务器端");
         this.setBounds(0, 0, 600, 600);
         // 窗体大小不能改变
@@ -97,7 +98,7 @@ public class TimeServerUI extends JFrame{
         sendB.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                     try {
-                        Map<String, SocketChannel> map = GatewayService.getChannels();
+                        Map<String, SocketChannel> map = TempTestChannelManagerService.getChannels();
                         Iterator<String> it = map.keySet().iterator();
 //                        无筛选向所有客户端发消息
                         while (it.hasNext()) {
@@ -139,7 +140,7 @@ public class TimeServerUI extends JFrame{
 
 
 
-                    Map<String, SocketChannel> map = GatewayService.getChannels();
+                    Map<String, SocketChannel> map = TempTestChannelManagerService.getChannels();
                     Iterator<String> it = map.keySet().iterator();
 //                        无筛选向所有客户端发消息
                     while (it.hasNext()) {
@@ -182,7 +183,7 @@ public class TimeServerUI extends JFrame{
 
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Map<String, SocketChannel> map = GatewayService.getChannels();
+                    Map<String, SocketChannel> map = TempTestChannelManagerService.getChannels();
                     Iterator<String> it = map.keySet().iterator();
 //                        无筛选向所有客户端发消息
                     while (it.hasNext()) {
@@ -219,7 +220,7 @@ public class TimeServerUI extends JFrame{
 
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Map<String, SocketChannel> map = GatewayService.getChannels();
+                    Map<String, SocketChannel> map = TempTestChannelManagerService.getChannels();
                     Iterator<String> it = map.keySet().iterator();
 //                        无筛选向所有客户端发消息
                     while (it.hasNext()) {
@@ -259,7 +260,7 @@ public class TimeServerUI extends JFrame{
         sendB4.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Map<String, SocketChannel> map = GatewayService.getChannels();
+                    Map<String, SocketChannel> map = TempTestChannelManagerService.getChannels();
                     Iterator<String> it = map.keySet().iterator();
 //                        无筛选向所有客户端发消息
                     while (it.hasNext()) {
@@ -297,7 +298,7 @@ public class TimeServerUI extends JFrame{
         sendB5.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Map<String, SocketChannel> map = GatewayService.getChannels();
+                    Map<String, SocketChannel> map = TempTestChannelManagerService.getChannels();
                     Iterator<String> it = map.keySet().iterator();
 //                        无筛选向所有客户端发消息
                     while (it.hasNext()) {
@@ -338,7 +339,7 @@ public class TimeServerUI extends JFrame{
         sendB6.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Map<String, SocketChannel> map = GatewayService.getChannels();
+                    Map<String, SocketChannel> map = TempTestChannelManagerService.getChannels();
                     Iterator<String> it = map.keySet().iterator();
 //                        无筛选向所有客户端发消息
                     while (it.hasNext()) {
@@ -385,7 +386,7 @@ public class TimeServerUI extends JFrame{
         sendB7.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Map<String, SocketChannel> map = GatewayService.getChannels();
+                    Map<String, SocketChannel> map = TempTestChannelManagerService.getChannels();
                     Iterator<String> it = map.keySet().iterator();
 //                        无筛选向所有客户端发消息
                     while (it.hasNext()) {
@@ -440,7 +441,7 @@ public class TimeServerUI extends JFrame{
             }
         };
 
-        mTimeServer= new TimeServer(mUICallBack);
+        mTimeServer= new LockServer(mUICallBack);
         //        启动客户端
         try {
             mTimeServer.bind(port);
@@ -448,9 +449,20 @@ public class TimeServerUI extends JFrame{
             e.printStackTrace();
         }
 
+
+
+
+
+
+
+
+
+
     }
     public static void main(String[] args) {
-        int port = 8981;
+        int port = 8982;
+        int apiPort = 8981;
+        String apiURL = "127.0.0.1";
         try {
 //            Properties prop1 = new Properties();
 //            ///保存属性到b.properties文件
@@ -474,8 +486,19 @@ public class TimeServerUI extends JFrame{
         }catch (Exception e){
 
         }
+        //        启动客户端
+        timeClient=new LockToApiClient();
+        try {
+            timeClient.connect(apiPort,apiURL);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         // 实例化对象
-        TimeServerUI qq = new TimeServerUI(port);
+        LockServerUI qq = new LockServerUI(port,apiPort,apiURL);
+
+
+
+
     }
 
 

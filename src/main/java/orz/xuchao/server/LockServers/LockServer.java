@@ -1,4 +1,4 @@
-package orz.xuchao.server;
+package orz.xuchao.server.LockServers;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -13,9 +13,8 @@ import orz.xuchao.server.uicallback.UICallBack;
 /**
  * Created by Administrator on 2017/7/6 0006.
  */
-public class TimeServer
+public class LockServer
 {
-    public SocketChannel socketChannel;
 
     private static final int MAX_FRAME_LENGTH = 1024 * 1024;
     private static final int LENGTH_FIELD_LENGTH = 2;
@@ -27,7 +26,7 @@ public class TimeServer
 
 
 
-    public TimeServer(UICallBack mUICallBack){
+    public LockServer(UICallBack mUICallBack){
         this.mUICallBack = mUICallBack;
     }
 
@@ -48,7 +47,7 @@ public class TimeServer
 //                            ch.pipeline().addLast(new StringDecoder());
                             ch.pipeline().addLast(new CustomDecoder(MAX_FRAME_LENGTH,LENGTH_FIELD_LENGTH,LENGTH_FIELD_OFFSET,LENGTH_ADJUSTMENT,INITIAL_BYTES_TO_STRIP,false));
                             ch.pipeline().addLast(new CustomEncoder());
-                            ch.pipeline().addLast(new TimeServerHandler(mUICallBack));
+                            ch.pipeline().addLast(new LockServerHandler(mUICallBack));
                         }
                     })
                     .childOption(ChannelOption.SO_KEEPALIVE, true);

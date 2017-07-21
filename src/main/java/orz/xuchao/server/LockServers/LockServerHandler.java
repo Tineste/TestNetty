@@ -1,4 +1,4 @@
-package orz.xuchao.server;
+package orz.xuchao.server.LockServers;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -9,29 +9,40 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import orz.xuchao.server.bean.BasePackage;
 import orz.xuchao.server.bean.CustomMsg;
-import orz.xuchao.server.channelmanager.GatewayService;
 import orz.xuchao.server.uicallback.UICallBack;
 import orz.xuchao.server.utils.CRCUtil;
 
 import java.util.Calendar;
-
-import static com.oracle.jrockit.jfr.ContentType.Bytes;
+import java.util.Map;
 
 
 /**
  * Created by Administrator on 2017/7/6 0006.
  */
-public class TimeServerHandler extends ChannelInboundHandlerAdapter {
+public class LockServerHandler extends ChannelInboundHandlerAdapter {
 
-    private static final Logger logger = LogManager.getLogger(TimeServerHandler.class.getName());
+    private static final Logger logger = LogManager.getLogger(LockServerHandler.class.getName());
+
+
+
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
         super.handlerRemoved(ctx);
         String uuid=ctx.channel().id().asLongText();
-        GatewayService.removeGatewayChannel(uuid);
-        System.out.println("设备id为"+ctx.channel().id()+"的设备断开了连接");
-        mUICallBack.refreshText("\r\n设备id为"+ctx.channel().id()+"的设备断开了连接\r\n\r\n");
-        logger.info("设备id为"+ctx.channel().id()+"的设备断开了连接");
+        System.out.println("设备id为"+uuid+"的设备断开了连接");
+        mUICallBack.refreshText("\r\n设备id为"+uuid+"的设备断开了连接\r\n\r\n");
+        logger.info("设备id为"+uuid+"的设备断开了连接");
+
+
+        Map<String, SocketChannel>  map =TempTestChannelManagerService.getChannels();
+        //遍历map中的值
+
+        for (String key : map.keySet()) {
+
+            if(map.get(key).equals(ctx.channel()))
+                TempTestChannelManagerService.removeGatewayChannel(key);
+        }
+
 
 
     }
@@ -39,19 +50,15 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
     private UICallBack mUICallBack;
 
 
-    public TimeServerHandler(UICallBack mUICallBack){
+    public LockServerHandler(UICallBack mUICallBack){
         this.mUICallBack = mUICallBack;
     }
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         String uuid=ctx.channel().id().asLongText();
-        GatewayService.addGatewayChannel(uuid,(SocketChannel)ctx.channel());
-
-
-
-        System.out.println("一个客户端连接进来了："+uuid+"  目前有"+GatewayService.getChannels().size()+"个设备连入服务器 ");
-        mUICallBack.refreshText("\r\n一个客户端连接进来了："+uuid+"  目前有"+GatewayService.getChannels().size()+"个设备连入服务器 \r\n\r\n");
-        logger.info("一个客户端连接进来了："+uuid+"  目前有"+GatewayService.getChannels().size()+"个设备连入服务器");
+        System.out.println("一个客户端连接进来了："+uuid);
+        mUICallBack.refreshText("\r\n一个客户端连接进来了："+uuid+"  \r\n\r\n");
+        logger.info("一个客户端连接进来了："+uuid);
     }
 
     @Override
@@ -209,6 +216,7 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case  0x02: {
 
+                    System.out.println("==========================>所服务器收到 门锁  注册mac地址 命令");
                     BasePackage mBasePackage=new BasePackage();
                     ByteBuf customMsgBody2=Unpooled.buffer(req.length);
                     customMsgBody2.writeBytes(req);
@@ -230,6 +238,18 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     sb.append("服务器返回客户端0x02指令的结果 \r\n\r\n");
                     System.out.println();
 
+                    byte[] time=new byte[4];
+                    System.arraycopy(req, 7, time, 0, 4);
+
+                    byte[] mac = new byte[6];
+                    System.arraycopy(req, 1, mac, 0, 6);
+                    sb.append("mac地址是"+CRCUtil.bytesToHexString(mac)+" \r\n\r\n");
+
+//                    以mac为key，通道为value，放入map管理
+                    TempTestChannelManagerService.addGatewayChannel(CRCUtil.bytesToHexString(mac),(SocketChannel)ctx.channel());
+
+
+
 
                     BasePackage mBasePackage2=new BasePackage();
                     ByteBuf flag=Unpooled.buffer(2);
@@ -238,15 +258,25 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     mBasePackage2.setChannel((byte) 0x11);
                     mBasePackage2.setProtocolVersion((byte) 0x01);
 
-                    byte[] data = {0x02,
-                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                            0x01,0x02,0x03,0x04,
-                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                            0x01
-                    };
+//                    byte[] data = {0x02,
+//                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+//                            0x01,0x02,0x03,0x04,
+//                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+//                            0x01
+//                    };
 
-                    ByteBuf body=Unpooled.buffer(data.length);
-                    body.writeBytes(data);
+                    byte[] orlder={0x02};
+                    byte[] result={0x01};
+                    byte[] blueSecret={0x01, 0x01, 0x02, 0x02, 0x03, 0x03};
+
+
+
+
+
+
+                    ByteBuf body=Unpooled.copiedBuffer(orlder,mac,time,blueSecret,result);
+
+
                     mBasePackage2.setBody(body);
                     CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
                     byte[] ee2=new byte[2];
@@ -255,6 +285,52 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     ctx.writeAndFlush(customMsgaa);
                     logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
+
+
+
+//                    去中心服务器注册门锁的mac地址
+                    System.out.println("==========================>所服务器去中心服务器注册门锁的mac地址");
+                    byte[] serverMac={0x06,0x05,0x04,0x03,0x02,0x01};
+                    registerMac(mac,serverMac,time);
+
+
+
+
+
+
+
+
+
+
+                }
+                break;
+                case 0x13:{
+                    try {
+                        SocketChannel obj = TempTestChannelManagerService.getGatewayChannel("010203040506");
+
+                        BasePackage mBasePackage=new BasePackage();
+                        ByteBuf flag=Unpooled.buffer(2);
+                        flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                        mBasePackage.setFlag(flag);
+                        mBasePackage.setChannel((byte) 0x01);
+                        mBasePackage.setProtocolVersion((byte) 0x01);
+                        byte[] bbody={
+                                0x03
+                                ,0x05,0x01,0x00,0x01,0x02,0x03
+                                ,0x59,0x3D,0x34,0x11};
+                        ByteBuf body=Unpooled.buffer(bbody.length);
+                        body.writeBytes(bbody);
+                        mBasePackage.setBody(body);
+                        CustomMsg customMsg0=mBasePackage.getCustomMsg();
+                        byte[] ee=new byte[2];
+                        customMsg0.getEnd().getBytes(0,ee);
+                        System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
+                        obj.writeAndFlush(customMsg0);
+
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+
 
                 }
                 break;
@@ -280,6 +356,40 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println();
                     logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
+
+
+                    SocketChannel obj =  TempTestChannelManagerService.getGatewayChannel("050100000001");
+
+
+                    if(null!=obj){
+
+                        BasePackage mBasePackage2=new BasePackage();
+                        ByteBuf flag=Unpooled.buffer(2);
+                        flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                        mBasePackage2.setFlag(flag);
+                        mBasePackage2.setChannel((byte) 0x11);
+                        mBasePackage2.setProtocolVersion((byte) 0x01);
+
+                        byte[] data = {0x13,
+                                0x05, 0x01, 0x00, 0x01, 0x02, 0x03,
+                                0x23, (byte) 0xC9, 0x3B, (byte) 0x89, 0x4A, (byte) 0xED, (byte) 0xF0, 0x65,
+                                0x59, 0x3D, 0x34, 0x11,
+                                0x01
+                        };
+
+                        ByteBuf body=Unpooled.buffer(data.length);
+                        body.writeBytes(data);
+                        mBasePackage2.setBody(body);
+                        CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
+                        byte[] ee3=new byte[2];
+                        customMsgaa.getEnd().getBytes(0,ee3);
+                        System.out.println("客户端应答应服务器的包，包尾是--->"+ CRCUtil.bytesToHexString(ee3));
+                        obj.writeAndFlush(customMsgaa);
+
+
+                    }
+
+
                 }
                 break;
                 case 0x04:{
@@ -305,6 +415,67 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println();
                     logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
+
+
+                    SocketChannel obj =  TempTestChannelManagerService.getGatewayChannel("050100000001");
+
+                    if(null!=obj) {
+                        BasePackage mBasePackage2 = new BasePackage();
+                        ByteBuf flag = Unpooled.buffer(2);
+                        flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+                        mBasePackage2.setFlag(flag);
+                        mBasePackage2.setChannel((byte) 0x11);
+                        mBasePackage2.setProtocolVersion((byte) 0x01);
+                        byte[] data = {0x14,
+                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                0x01, 0x02, 0x03, 0x04,
+                                0x01, 0x02, 0x03, 0x04,
+                                0x01
+                        };
+                        ByteBuf body = Unpooled.buffer(data.length);
+                        body.writeBytes(data);
+                        mBasePackage2.setBody(body);
+                        CustomMsg customMsgaa = mBasePackage2.getCustomMsg();
+                        byte[] ee22 = new byte[2];
+                        customMsgaa.getEnd().getBytes(0, ee22);
+                        System.out.println("客户端应答应服务器的包，包尾是--->" + CRCUtil.bytesToHexString(ee22));
+                        obj.writeAndFlush(customMsgaa);
+
+                    }
+
+                }
+                break;
+                case 0x14:{
+                    try {
+                        SocketChannel obj =  TempTestChannelManagerService.getGatewayChannel("010203040506");
+
+                            BasePackage mBasePackage=new BasePackage();
+                            ByteBuf flag=Unpooled.buffer(2);
+                            flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                            mBasePackage.setFlag(flag);
+                            mBasePackage.setChannel((byte) 0x01);
+                            mBasePackage.setProtocolVersion((byte) 0x01);
+                            byte[] bbody={0x04
+                                    ,0x01,0x02,0x03,0x04,0x05,0x06
+                                    ,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08
+                                    ,0x01,0x02,0x03,0x04
+                                    ,0x01,0x02,0x03,0x04};
+                            ByteBuf body=Unpooled.buffer(bbody.length);
+                            body.writeBytes(bbody);
+                            mBasePackage.setBody(body);
+                            CustomMsg customMsg14=mBasePackage.getCustomMsg();
+                            byte[] ee=new byte[2];
+                            customMsg14.getEnd().getBytes(0,ee);
+                            System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
+                            obj.writeAndFlush(customMsg14);
+
+
+
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+
 
                 }
                 break;
@@ -336,6 +507,41 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
 
                 }
                 break;
+                case 0x16:{
+
+                    try {
+                        SocketChannel obj =  TempTestChannelManagerService.getGatewayChannel("010203040506");
+
+
+                            BasePackage mBasePackage=new BasePackage();
+                            ByteBuf flag=Unpooled.buffer(2);
+                            flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                            mBasePackage.setFlag(flag);
+                            mBasePackage.setChannel((byte) 0x01);
+                            mBasePackage.setProtocolVersion((byte) 0x01);
+                            byte[] bbody={0x06
+                                    ,0x01,0x02,0x03,0x04,0x05,0x06
+                                    ,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08
+                                    ,0x01
+                                    ,0x01,0x02,0x03,0x04};
+                            ByteBuf body=Unpooled.buffer(bbody.length);
+                            body.writeBytes(bbody);
+                            mBasePackage.setBody(body);
+                            CustomMsg customMsg16=mBasePackage.getCustomMsg();
+                            byte[] ee=new byte[2];
+                            customMsg16.getEnd().getBytes(0,ee);
+                            System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
+                            obj.writeAndFlush(customMsg16);
+
+
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+
+                }
+                break;
+
+
                 case 0x06:{
 
 
@@ -362,6 +568,57 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
+
+//                    调用api服务器通知开门完成
+                    BasePackage mBasePackage2 = new BasePackage();
+                    ByteBuf flag = Unpooled.buffer(2);
+                    flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+                    mBasePackage2.setFlag(flag);
+                    mBasePackage2.setChannel((byte) 0x11);
+                    mBasePackage2.setProtocolVersion((byte) 0x01);
+
+                    req[0]=0x27;
+
+                    byte[] req2=new byte[req.length-1];
+                    System.arraycopy(req, 0, req2, 0,req.length-1);
+
+                    ByteBuf body = Unpooled.buffer(req2.length);
+                    body.writeBytes(req);
+
+                    mBasePackage2.setBody(body);
+                    CustomMsg customMsgaa = mBasePackage2.getCustomMsg();
+                    byte[] ee22 = new byte[2];
+                    customMsgaa.getEnd().getBytes(0, ee22);
+                    System.out.println("客户端应答应服务器的包，包尾是--->" + CRCUtil.bytesToHexString(ee22));
+                    LockServerUI.timeClient.socketChannel.writeAndFlush(customMsgaa);
+
+
+
+
+//                    SocketChannel obj =  TempTestChannelManagerService.getGatewayChannel("050100000001");
+//                    if(null!=obj) {
+//                        BasePackage mBasePackage2 = new BasePackage();
+//                        ByteBuf flag = Unpooled.buffer(2);
+//                        flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+//                        mBasePackage2.setFlag(flag);
+//                        mBasePackage2.setChannel((byte) 0x11);
+//                        mBasePackage2.setProtocolVersion((byte) 0x01);
+//                        byte[] data = {0x16,
+//                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+//                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+//                                0x01,
+//                                0x01, 0x02, 0x03, 0x04,
+//                                0x01
+//                        };
+//                        ByteBuf body = Unpooled.buffer(data.length);
+//                        body.writeBytes(data);
+//                        mBasePackage2.setBody(body);
+//                        CustomMsg customMsgaa = mBasePackage2.getCustomMsg();
+//                        byte[] ee22 = new byte[2];
+//                        customMsgaa.getEnd().getBytes(0, ee22);
+//                        System.out.println("客户端应答应服务器的包，包尾是--->" + CRCUtil.bytesToHexString(ee22));
+//                        obj.writeAndFlush(customMsgaa);
+//                    }
 
 
                 }
@@ -674,6 +931,43 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
 
                 }
                 break;
+                case 0x1C:{
+                    try {
+
+                        SocketChannel obj =  TempTestChannelManagerService.getGatewayChannel("010203040506");
+
+
+
+                            BasePackage mBasePackage=new BasePackage();
+                            ByteBuf flag=Unpooled.buffer(2);
+                            flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+                            mBasePackage.setFlag(flag);
+                            mBasePackage.setChannel((byte) 0x01);
+                            mBasePackage.setProtocolVersion((byte) 0x01);
+                            byte[] bbody={  0x0C,
+                                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                                    0x01, 0x02, 0x03, 0x04,
+                                    0x01, 0x02, 0x03, 0x04,
+                                    0x01, 0x02,
+                                    0x01, 0x02, 0x03, 0x04};
+                            ByteBuf body=Unpooled.buffer(bbody.length);
+                            body.writeBytes(bbody);
+                            mBasePackage.setBody(body);
+                            CustomMsg customMsg1c=mBasePackage.getCustomMsg();
+                            byte[] ee=new byte[2];
+                            customMsg1c.getEnd().getBytes(0,ee);
+                            System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
+                            obj.writeAndFlush(customMsg1c);
+
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                    }
+
+
+                }
+                break;
+
+
                 case 0x0C:{
 
 
@@ -699,28 +993,64 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
                     logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
+
+
+
+
+
+
+                    SocketChannel obj =  TempTestChannelManagerService.getGatewayChannel("050100000001");
+
+
+
+                    if(null!=obj) {
+                        BasePackage mBasePackage2 = new BasePackage();
+                        ByteBuf flag = Unpooled.buffer(2);
+                        flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
+                        mBasePackage2.setFlag(flag);
+                        mBasePackage2.setChannel((byte) 0x11);
+                        mBasePackage2.setProtocolVersion((byte) 0x01);
+                        byte[] data = {
+                                0x1C,
+                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+                                0x01, 0x02,
+                                0x05,
+
+
+                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                0x01, 0x02, 0x03, 0x04,
+                                0x01, 0x02, 0x03, 0x04,
+                                0x02, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                0x01, 0x02, 0x03, 0x04,
+                                0x01, 0x02, 0x03, 0x04,
+                                0x03, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                0x01, 0x02, 0x03, 0x04,
+                                0x01, 0x02, 0x03, 0x04,
+                                0x04, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                0x01, 0x02, 0x03, 0x04,
+                                0x01, 0x02, 0x03, 0x04,
+                                0x05, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                0x01, 0x02, 0x03, 0x04,
+                                0x01, 0x02, 0x03, 0x04,
+
+
+                                0x01, 0x02, 0x03, 0x04,
+                                0x01
+                        };
+                        ByteBuf body = Unpooled.buffer(data.length);
+                        body.writeBytes(data);
+                        mBasePackage2.setBody(body);
+                        CustomMsg customMsgaa = mBasePackage2.getCustomMsg();
+                        byte[] ee22 = new byte[2];
+                        customMsgaa.getEnd().getBytes(0, ee22);
+                        System.out.println("客户端应答应服务器的包，包尾是--->" + CRCUtil.bytesToHexString(ee22));
+                        obj.writeAndFlush(customMsgaa);
+
+                    }
+
                 }
                 break;
                 case 0x0D:{
-//                    StringBuffer sb=new StringBuffer();
-//                    sb.append("服务器端收到客户端"+uuid+"命令0x0D的应答 \r\n ");
-//                    System.out.println("服务器收到客户端命令0x0D的应答  ");
-//                    for (int i = 0; i < req.length; i++) {
-//                        System.out.print(req[i]);
-//                        sb.append(req[i]+".");
-//                    }
-//                    System.out.println();
-//
-//
-//                    System.out.println("服务器读取给定时间范围内开门日志指令完成");
-//                    sb.append("\r\n服务器 读取给定时间范围内开门日志指令完成\r\n\r\n");
-//                    System.out.println();
-//                    mUICallBack.refreshText(sb.toString());
-
-
-
-
-
                     BasePackage mBasePackage=new BasePackage();
                     byte[] ee2=new byte[2];
                     customMsgEnd.getBytes(0,ee2);
@@ -771,6 +1101,34 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
 
                 }
                 break;
+
+                case 0x27:{
+                    BasePackage mBasePackage=new BasePackage();
+                    byte[] ee2=new byte[2];
+                    customMsgEnd.getBytes(0,ee2);
+                    System.out.println("服务器端收到客户端返回的包尾是--->"+ CRCUtil.bytesToHexString(ee2));
+                    ByteBuf customMsgBody2=Unpooled.buffer(req.length);
+                    customMsgBody2.writeBytes(req);
+                    mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
+                    StringBuffer sb = new StringBuffer();
+                    sb.append("服务器端收到客户端"+uuid+"命令0x27的应答   \r\n");
+                    System.out.println("服务器收到客户端命令0x27的应答  ");
+                    if( mBasePackage.checkCRC()){
+                        sb.append("CRC验证成功！\r\n");
+                    }else {
+                        sb.append("CRC验证失败！\r\n");
+                    }
+                    sb.append(CRCUtil.bytesToHexString(req)+".");
+                    System.out.println("服务器向智能门禁发送远程升级指令完成");
+                    sb.append("\r\n服务器向智能门禁发送远程升级指令完成\r\n\r\n");
+                    System.out.println();
+                    logger.info(sb.toString());
+                    mUICallBack.refreshText(sb.toString());
+
+                }
+                break;
+
+
                default:
                 break;
             }
@@ -807,5 +1165,31 @@ public class TimeServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         ctx.close();
+    }
+
+
+    private void registerMac(byte[] lockMac,byte[] serverMac,byte[] time){
+        BasePackage mBasePackage2=new BasePackage();
+        ByteBuf flag=Unpooled.buffer(2);
+        flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+        mBasePackage2.setFlag(flag);
+        mBasePackage2.setChannel((byte) 0x11);
+        mBasePackage2.setProtocolVersion((byte) 0x01);
+        byte[] orlder={0x21};
+
+        ByteBuf byteBuf=Unpooled.copiedBuffer(orlder,lockMac,serverMac,time);
+
+        mBasePackage2.setBody(byteBuf);
+        CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
+        byte[] ee2=new byte[2];
+        customMsgaa.getEnd().getBytes(0,ee2);
+        System.out.println("服务器返回客户端的包，包尾是--->"+ CRCUtil.bytesToHexString(ee2));
+        LockServerUI.timeClient.socketChannel.writeAndFlush(customMsgaa);
+
+    }
+
+    private void  openCompleteToApiServer(){
+
+
     }
 }
