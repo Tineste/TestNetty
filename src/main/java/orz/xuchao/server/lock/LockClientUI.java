@@ -173,14 +173,17 @@ public class LockClientUI extends JFrame{
                 mBasePackage.setFlag(flag);
                 mBasePackage.setChannel((byte) 0x01);
                 mBasePackage.setProtocolVersion((byte) 0x01);
-                byte[] bbody={
-                        0x07
-                        ,0x01,0x02,0x03,0x04,0x05,0x06
-                        ,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08
-                        ,0x01
-                        ,0x59,0x3D,0x34,0x11};
-                ByteBuf body=Unpooled.buffer(bbody.length);
-                body.writeBytes(bbody);
+
+
+
+                byte[] orlder={0x07};
+                byte[] mac=LockConfig.mac;
+                byte[] id={0x04,0x04,0x03,0x03,0x02,0x02,0x01,0x01};
+                byte[] type={0x01};
+                Calendar calendar1 = Calendar.getInstance();
+                byte[] time= CRCUtil.timeToBytes(calendar1);
+                ByteBuf body=Unpooled.copiedBuffer(orlder,mac,id,type,time);
+
                 mBasePackage.setBody(body);
                 CustomMsg customMsg=mBasePackage.getCustomMsg();
                 byte[] ee=new byte[2];

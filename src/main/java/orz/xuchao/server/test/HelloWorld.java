@@ -5,6 +5,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import orz.xuchao.server.utils.CRCUtil;
+
+import java.util.Calendar;
 
 /**
  * Created by Administrator on 2017/7/4 0004.
@@ -21,6 +24,19 @@ public class HelloWorld {
 
 
     public static void main(String[] args)throws  Exception {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2020,2,22);
+        byte[] time1= CRCUtil.timeToBytes(calendar);
+        Calendar calendar2= Calendar.getInstance();
+        byte[] time2= CRCUtil.timeToBytes(calendar2);
+
+        System.out.println(CRCUtil.bytesToTime(time1));
+        System.out.println(CRCUtil.bytesToTime(time2));
+
+
+
+
 //        HelloWorld mHelloWorld=new HelloWorld();
 //        mHelloWorld.logout();
 

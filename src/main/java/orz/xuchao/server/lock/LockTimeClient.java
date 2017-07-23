@@ -77,7 +77,7 @@ public class LockTimeClient {
 //                        ,0x59,0x6C,0x3F, (byte) 0xD7};
 
                 byte[] orlder={0x01};
-                byte[] mac ={0x01,0x02, 0x03,0x04, 0x05,0x06};
+                byte[] mac = LockConfig.mac;
                 Calendar calendar = Calendar.getInstance();
                 byte[] time=CRCUtil.timeToBytes(calendar);
                 byte[] bbody=new byte[orlder.length+mac.length+time.length];
@@ -130,7 +130,7 @@ public class LockTimeClient {
             f=b.connect(url,port).sync();
             if(f.isSuccess()){
 
-                 System.out.println("==========================>完成服务器转接，注册mac地址");
+                 System.out.println("==========================>完成服务器转接，注册mac地址0x02");
                 socketChannel=(SocketChannel)f.channel();
 //                一上来就向服务器申报mac用于区分通道
                 BasePackage mBasePackage=new BasePackage();
@@ -140,7 +140,7 @@ public class LockTimeClient {
                 mBasePackage.setChannel((byte) 0x01);
                 mBasePackage.setProtocolVersion((byte) 0x01);
                 byte[] orlder={0x02};
-                byte[] mac ={0x01,0x02, 0x03,0x04, 0x05,0x06};
+                byte[] mac = LockConfig.mac;
                 Calendar calendar = Calendar.getInstance();
                 byte[] time=CRCUtil.timeToBytes(calendar);
                 byte[] bbody=new byte[orlder.length+mac.length+time.length];
