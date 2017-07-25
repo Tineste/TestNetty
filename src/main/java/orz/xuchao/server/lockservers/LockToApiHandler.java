@@ -578,29 +578,29 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                 }
                 break;
 
-                case 0x36:{
-
-                    byte[] lockMac = new byte[6];
-                    System.arraycopy(req, 1, lockMac, 0, 6);
-                    byte[] id = new byte[8];
-                    System.arraycopy(req, 7, id, 0, 8);
-
-                    byte[] type = new byte[1];
-                    System.arraycopy(req, 15, type, 0, 1);
-
-                    byte[] time = new byte[4];
-                    System.arraycopy(req, 16, time, 0, 4);
-
-                    byte[] resoult = new byte[1];
-                    System.arraycopy(req, 20, time, 0, 1);
-                    System.out.println("\r\n门锁的mac地址是："+CRCUtil.bytesToHexString(lockMac)+"\r\n");
-                    System.out.println("\r\nid是："+CRCUtil.bytesToHexString(id)+"\r\n");
-                    System.out.println("\r\ntype是："+CRCUtil.bytesToHexString(type)+"\r\n");
-                    System.out.println("\r\n时间是："+CRCUtil.bytesToHexString(time)+"\r\n");
-                    System.out.println("服务器返回客户端0x26指令的结果"+resoult+" \r\n\r\n");
-                    System.out.println();
-                }
-                break;
+//                case 0x36:{
+//
+//                    byte[] lockMac = new byte[6];
+//                    System.arraycopy(req, 1, lockMac, 0, 6);
+//                    byte[] id = new byte[8];
+//                    System.arraycopy(req, 7, id, 0, 8);
+//
+//                    byte[] type = new byte[1];
+//                    System.arraycopy(req, 15, type, 0, 1);
+//
+//                    byte[] time = new byte[4];
+//                    System.arraycopy(req, 16, time, 0, 4);
+//
+//                    byte[] resoult = new byte[1];
+//                    System.arraycopy(req, 20, time, 0, 1);
+//                    System.out.println("\r\n门锁的mac地址是："+CRCUtil.bytesToHexString(lockMac)+"\r\n");
+//                    System.out.println("\r\nid是："+CRCUtil.bytesToHexString(id)+"\r\n");
+//                    System.out.println("\r\ntype是："+CRCUtil.bytesToHexString(type)+"\r\n");
+//                    System.out.println("\r\n时间是："+CRCUtil.bytesToHexString(time)+"\r\n");
+//                    System.out.println("服务器返回客户端0x26指令的结果"+resoult+" \r\n\r\n");
+//                    System.out.println();
+//                }
+//                break;
 
                 case 0x07:{
 
@@ -728,42 +728,42 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                 }
                 break;
 
-                case 0x34:{
-
-                    System.out.println("服务器返回客户端0x34指令的结果\r\n\r\n");
-                    System.out.println();
-                }
-                break;
-                case 0x35:{
-
-                    System.out.println("服务器返回客户端0x35指令的结果\r\n\r\n");
-                    System.out.println();
-                }
-                break;
-                case 0x39:{
-
-                    System.out.println("服务器返回客户端0x39指令的结果\r\n\r\n");
-                    System.out.println();
-                }
-                break;
-                case 0x3C:{
-
-                    System.out.println("服务器返回客户端0x3C指令的结果\r\n\r\n");
-                    System.out.println();
-                }
-                break;
-                case 0x3D:{
-
-                    System.out.println("服务器返回客户端0x3C指令的结果\r\n\r\n");
-                    System.out.println();
-                }
-                break;
-                case 0x3E:{
-
-                    System.out.println("服务器返回客户端0x3C指令的结果\r\n\r\n");
-                    System.out.println();
-                }
-                break;
+//                case 0x34:{
+//
+//                    System.out.println("服务器返回客户端0x34指令的结果\r\n\r\n");
+//                    System.out.println();
+//                }
+//                break;
+//                case 0x35:{
+//
+//                    System.out.println("服务器返回客户端0x35指令的结果\r\n\r\n");
+//                    System.out.println();
+//                }
+//                break;
+//                case 0x39:{
+//
+//                    System.out.println("服务器返回客户端0x39指令的结果\r\n\r\n");
+//                    System.out.println();
+//                }
+//                break;
+//                case 0x3C:{
+//
+//                    System.out.println("服务器返回客户端0x3C指令的结果\r\n\r\n");
+//                    System.out.println();
+//                }
+//                break;
+//                case 0x3D:{
+//
+//                    System.out.println("服务器返回客户端0x3C指令的结果\r\n\r\n");
+//                    System.out.println();
+//                }
+//                break;
+//                case 0x3E:{
+//
+//                    System.out.println("服务器返回客户端0x3C指令的结果\r\n\r\n");
+//                    System.out.println();
+//                }
+//                break;
 
 
 

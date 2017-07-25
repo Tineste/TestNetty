@@ -774,41 +774,41 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
 
                 }
                 break;
-                case 0x1C:{
-                    try {
-
-                        SocketChannel obj =  TempTestChannelManagerService.getGatewayChannel("010203040506");
-
-
-
-                            BasePackage mBasePackage=new BasePackage();
-                            ByteBuf flag=Unpooled.buffer(2);
-                            flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-                            mBasePackage.setFlag(flag);
-                            mBasePackage.setChannel((byte) 0x01);
-                            mBasePackage.setProtocolVersion((byte) 0x01);
-                            byte[] bbody={  0x0C,
-                                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                                    0x01, 0x02, 0x03, 0x04,
-                                    0x01, 0x02, 0x03, 0x04,
-                                    0x01, 0x02,
-                                    0x01, 0x02, 0x03, 0x04};
-                            ByteBuf body=Unpooled.buffer(bbody.length);
-                            body.writeBytes(bbody);
-                            mBasePackage.setBody(body);
-                            CustomMsg customMsg1c=mBasePackage.getCustomMsg();
-                            byte[] ee=new byte[2];
-                            customMsg1c.getEnd().getBytes(0,ee);
-                            System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
-                            obj.writeAndFlush(customMsg1c);
-
-                    } catch (Exception e1) {
-                        e1.printStackTrace();
-                    }
-
-
-                }
-                break;
+//                case 0x1C:{
+//                    try {
+//
+//                        SocketChannel obj =  TempTestChannelManagerService.getGatewayChannel("010203040506");
+//
+//
+//
+//                            BasePackage mBasePackage=new BasePackage();
+//                            ByteBuf flag=Unpooled.buffer(2);
+//                            flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+//                            mBasePackage.setFlag(flag);
+//                            mBasePackage.setChannel((byte) 0x01);
+//                            mBasePackage.setProtocolVersion((byte) 0x01);
+//                            byte[] bbody={  0x0C,
+//                                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+//                                    0x01, 0x02, 0x03, 0x04,
+//                                    0x01, 0x02, 0x03, 0x04,
+//                                    0x01, 0x02,
+//                                    0x01, 0x02, 0x03, 0x04};
+//                            ByteBuf body=Unpooled.buffer(bbody.length);
+//                            body.writeBytes(bbody);
+//                            mBasePackage.setBody(body);
+//                            CustomMsg customMsg1c=mBasePackage.getCustomMsg();
+//                            byte[] ee=new byte[2];
+//                            customMsg1c.getEnd().getBytes(0,ee);
+//                            System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
+//                            obj.writeAndFlush(customMsg1c);
+//
+//                    } catch (Exception e1) {
+//                        e1.printStackTrace();
+//                    }
+//
+//
+//                }
+//                break;
 
 
                 case 0x0C:{
@@ -948,89 +948,89 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                 }
                 break;
 
-                case 0x27:{
-                    BasePackage mBasePackage=new BasePackage();
-                    byte[] ee2=new byte[2];
-                    customMsgEnd.getBytes(0,ee2);
-                    System.out.println("服务器端收到客户端返回的包尾是--->"+ CRCUtil.bytesToHexString(ee2));
-                    ByteBuf customMsgBody2=Unpooled.buffer(req.length);
-                    customMsgBody2.writeBytes(req);
-                    mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
-                    StringBuffer sb = new StringBuffer();
-                    sb.append("服务器端收到客户端"+uuid+"命令0x27的应答   \r\n");
-                    System.out.println("服务器收到客户端命令0x27的应答  ");
-                    if( mBasePackage.checkCRC()){
-                        sb.append("CRC验证成功！\r\n");
-                    }else {
-                        sb.append("CRC验证失败！\r\n");
-                    }
-                    sb.append(CRCUtil.bytesToHexString(req)+".");
-                    System.out.println(" 、 开门信息 上报到服务器 指令");
-                    sb.append("\r\n 、 开门信息 上报到服务器 指令\r\n\r\n");
-                    System.out.println();
-                    logger.info(sb.toString());
-                    mUICallBack.refreshText(sb.toString());
-
-                }
-                break;
-                case 0x2A:{
-                    BasePackage mBasePackage=new BasePackage();
-                    byte[] ee2=new byte[2];
-                    customMsgEnd.getBytes(0,ee2);
-                    System.out.println("服务器端收到客户端返回的包尾是--->"+ CRCUtil.bytesToHexString(ee2));
-                    ByteBuf customMsgBody2=Unpooled.buffer(req.length);
-                    customMsgBody2.writeBytes(req);
-                    mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
-                    StringBuffer sb = new StringBuffer();
-
-
-
-                    byte[] mac=new byte[6];
-                    System.arraycopy(req, 1, mac, 0, 6);
-                    System.out.println("~~~~~~~~~33333~~~~~~~~" + CRCUtil.bytesToHexString(mac));
-
-
-                    sb.append("服务器端收到客户端"+uuid+"命令0x2A的应答   \r\n");
-                    System.out.println("服务器收到客户端命令0x2A的应答  ");
-                    if( mBasePackage.checkCRC()){
-                        sb.append("CRC验证成功！\r\n");
-                    }else {
-                        sb.append("CRC验证失败！\r\n");
-                    }
-                    sb.append(CRCUtil.bytesToHexString(req)+".");
-                    System.out.println(" 、 校对时间 指令");
-                    sb.append("\r\n 、 校对时间 指令\r\n\r\n");
-                    System.out.println();
-                    logger.info(sb.toString());
-                    mUICallBack.refreshText(sb.toString());
-
-                }
-                break;
-                case 0x2B:{
-                    BasePackage mBasePackage=new BasePackage();
-                    byte[] ee2=new byte[2];
-                    customMsgEnd.getBytes(0,ee2);
-                    System.out.println("服务器端收到客户端返回的包尾是--->"+ CRCUtil.bytesToHexString(ee2));
-                    ByteBuf customMsgBody2=Unpooled.buffer(req.length);
-                    customMsgBody2.writeBytes(req);
-                    mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
-                    StringBuffer sb = new StringBuffer();
-                    sb.append("服务器端收到客户端"+uuid+"命令0x2B的应答   \r\n");
-                    System.out.println("服务器收到客户端命令0x2B的应答  ");
-                    if( mBasePackage.checkCRC()){
-                        sb.append("CRC验证成功！\r\n");
-                    }else {
-                        sb.append("CRC验证失败！\r\n");
-                    }
-                    sb.append(CRCUtil.bytesToHexString(req)+".");
-                    System.out.println(" 报警 指令");
-                    sb.append("\r\n 、 报警 指令\r\n\r\n");
-                    System.out.println();
-                    logger.info(sb.toString());
-                    mUICallBack.refreshText(sb.toString());
-
-                }
-                break;
+//                case 0x27:{
+//                    BasePackage mBasePackage=new BasePackage();
+//                    byte[] ee2=new byte[2];
+//                    customMsgEnd.getBytes(0,ee2);
+//                    System.out.println("服务器端收到客户端返回的包尾是--->"+ CRCUtil.bytesToHexString(ee2));
+//                    ByteBuf customMsgBody2=Unpooled.buffer(req.length);
+//                    customMsgBody2.writeBytes(req);
+//                    mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
+//                    StringBuffer sb = new StringBuffer();
+//                    sb.append("服务器端收到客户端"+uuid+"命令0x27的应答   \r\n");
+//                    System.out.println("服务器收到客户端命令0x27的应答  ");
+//                    if( mBasePackage.checkCRC()){
+//                        sb.append("CRC验证成功！\r\n");
+//                    }else {
+//                        sb.append("CRC验证失败！\r\n");
+//                    }
+//                    sb.append(CRCUtil.bytesToHexString(req)+".");
+//                    System.out.println(" 、 开门信息 上报到服务器 指令");
+//                    sb.append("\r\n 、 开门信息 上报到服务器 指令\r\n\r\n");
+//                    System.out.println();
+//                    logger.info(sb.toString());
+//                    mUICallBack.refreshText(sb.toString());
+//
+//                }
+//                break;
+//                case 0x2A:{
+//                    BasePackage mBasePackage=new BasePackage();
+//                    byte[] ee2=new byte[2];
+//                    customMsgEnd.getBytes(0,ee2);
+//                    System.out.println("服务器端收到客户端返回的包尾是--->"+ CRCUtil.bytesToHexString(ee2));
+//                    ByteBuf customMsgBody2=Unpooled.buffer(req.length);
+//                    customMsgBody2.writeBytes(req);
+//                    mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
+//                    StringBuffer sb = new StringBuffer();
+//
+//
+//
+//                    byte[] mac=new byte[6];
+//                    System.arraycopy(req, 1, mac, 0, 6);
+//                    System.out.println("~~~~~~~~~33333~~~~~~~~" + CRCUtil.bytesToHexString(mac));
+//
+//
+//                    sb.append("服务器端收到客户端"+uuid+"命令0x2A的应答   \r\n");
+//                    System.out.println("服务器收到客户端命令0x2A的应答  ");
+//                    if( mBasePackage.checkCRC()){
+//                        sb.append("CRC验证成功！\r\n");
+//                    }else {
+//                        sb.append("CRC验证失败！\r\n");
+//                    }
+//                    sb.append(CRCUtil.bytesToHexString(req)+".");
+//                    System.out.println(" 、 校对时间 指令");
+//                    sb.append("\r\n 、 校对时间 指令\r\n\r\n");
+//                    System.out.println();
+//                    logger.info(sb.toString());
+//                    mUICallBack.refreshText(sb.toString());
+//
+//                }
+//                break;
+//                case 0x2B:{
+//                    BasePackage mBasePackage=new BasePackage();
+//                    byte[] ee2=new byte[2];
+//                    customMsgEnd.getBytes(0,ee2);
+//                    System.out.println("服务器端收到客户端返回的包尾是--->"+ CRCUtil.bytesToHexString(ee2));
+//                    ByteBuf customMsgBody2=Unpooled.buffer(req.length);
+//                    customMsgBody2.writeBytes(req);
+//                    mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
+//                    StringBuffer sb = new StringBuffer();
+//                    sb.append("服务器端收到客户端"+uuid+"命令0x2B的应答   \r\n");
+//                    System.out.println("服务器收到客户端命令0x2B的应答  ");
+//                    if( mBasePackage.checkCRC()){
+//                        sb.append("CRC验证成功！\r\n");
+//                    }else {
+//                        sb.append("CRC验证失败！\r\n");
+//                    }
+//                    sb.append(CRCUtil.bytesToHexString(req)+".");
+//                    System.out.println(" 报警 指令");
+//                    sb.append("\r\n 、 报警 指令\r\n\r\n");
+//                    System.out.println();
+//                    logger.info(sb.toString());
+//                    mUICallBack.refreshText(sb.toString());
+//
+//                }
+//                break;
 
 
                default:
