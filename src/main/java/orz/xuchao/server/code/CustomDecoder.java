@@ -41,7 +41,6 @@ public class CustomDecoder extends LengthFieldBasedFrameDecoder {
 
         ByteBuf mByteBuf=in;
         int len1=mByteBuf.readableBytes();
-        System.out.println(len1+"");
 
 
         if (mByteBuf == null) {

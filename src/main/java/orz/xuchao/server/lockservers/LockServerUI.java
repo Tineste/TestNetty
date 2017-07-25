@@ -1,4 +1,4 @@
-package orz.xuchao.server.LockServers;
+package orz.xuchao.server.lockservers;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

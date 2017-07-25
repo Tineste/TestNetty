@@ -78,7 +78,6 @@ public class BasePackage {
         byte[] crc2=new byte[temp.readableBytes()];
         temp.readBytes(crc2);
         short checkCRC2=CRCUtil.bytesToShort(crc2);
-        System.out.println(crc+"   ------===------   "+crc2);
         if(checkCRC1==checkCRC2){
             return true;
         }else {

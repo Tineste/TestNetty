@@ -3,10 +3,10 @@ package orz.xuchao.server.apiserverclient;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.socket.SocketChannel;
-import orz.xuchao.server.LockServers.LockServer;
+import orz.xuchao.server.lockservers.LockServer;
 import orz.xuchao.server.bean.BasePackage;
 import orz.xuchao.server.bean.CustomMsg;
-import orz.xuchao.server.LockServers.TempTestChannelManagerService;
+import orz.xuchao.server.lockservers.TempTestChannelManagerService;
 import orz.xuchao.server.uicallback.UICallBack;
 import orz.xuchao.server.utils.CRCUtil;
 

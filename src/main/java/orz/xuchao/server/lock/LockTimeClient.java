@@ -72,21 +72,14 @@ public class LockTimeClient {
                 mBasePackage.setFlag(flag);
                 mBasePackage.setChannel((byte) 0x01);
                 mBasePackage.setProtocolVersion((byte) 0x01);
-//                byte[] bbody={0x01
-//                        ,0x06,0x05, 0x04,0x03, 0x02,0x01
-//                        ,0x59,0x6C,0x3F, (byte) 0xD7};
-
                 byte[] orlder={0x01};
                 byte[] mac = LockConfig.mac;
                 Calendar calendar = Calendar.getInstance();
                 byte[] time=CRCUtil.timeToBytes(calendar);
                 byte[] bbody=new byte[orlder.length+mac.length+time.length];
-
                 System.arraycopy(orlder, 0, bbody, 0, orlder.length);
                 System.arraycopy(mac, 0, bbody, orlder.length, mac.length);
                 System.arraycopy(time, 0, bbody, orlder.length + mac.length, time.length);
-
-
                 ByteBuf body=Unpooled.buffer(bbody.length);
                 body.writeBytes(bbody);
                 mBasePackage.setBody(body);
@@ -129,7 +122,6 @@ public class LockTimeClient {
                     });
             f=b.connect(url,port).sync();
             if(f.isSuccess()){
-
                  System.out.println("==========================>完成服务器转接，注册mac地址0x02");
                 socketChannel=(SocketChannel)f.channel();
 //                一上来就向服务器申报mac用于区分通道
@@ -144,12 +136,9 @@ public class LockTimeClient {
                 Calendar calendar = Calendar.getInstance();
                 byte[] time=CRCUtil.timeToBytes(calendar);
                 byte[] bbody=new byte[orlder.length+mac.length+time.length];
-
                 System.arraycopy(orlder, 0, bbody, 0, orlder.length);
                 System.arraycopy(mac, 0, bbody, orlder.length, mac.length);
                 System.arraycopy(time, 0, bbody, orlder.length + mac.length, time.length);
-
-
                 ByteBuf body=Unpooled.buffer(bbody.length);
                 body.writeBytes(bbody);
                 mBasePackage.setBody(body);
@@ -158,7 +147,6 @@ public class LockTimeClient {
                 customMsg.getEnd().getBytes(0,ee);
                 System.out.println("客户端发出的包，包尾是=====>"+ CRCUtil.bytesToHexString(ee));
                 socketChannel.writeAndFlush(customMsg);
-
             }
 //            f.channel().closeFuture();
         }finally {

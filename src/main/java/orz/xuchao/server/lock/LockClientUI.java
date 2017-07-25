@@ -141,23 +141,23 @@ public class LockClientUI extends JFrame{
         sendB2.setBounds(50, 70, 500, 20);
         sendB2.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                BasePackage mBasePackage=new BasePackage();
-                ByteBuf flag=Unpooled.buffer(2);
-                flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-                mBasePackage.setFlag(flag);
-                mBasePackage.setChannel((byte) 0x01);
-                mBasePackage.setProtocolVersion((byte) 0x01);
-                byte[] bbody={0x02
-                        ,0x01,0x02,0x03,0x04,0x05,0x06
-                        ,0x59,0x3D,0x34,0x11};
-                ByteBuf body=Unpooled.buffer(bbody.length);
-                body.writeBytes(bbody);
-                mBasePackage.setBody(body);
-                CustomMsg customMsg=mBasePackage.getCustomMsg();
-                byte[] ee=new byte[2];
-                customMsg.getEnd().getBytes(0,ee);
-                System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
-                timeClient.socketChannel.writeAndFlush(customMsg);
+//                BasePackage mBasePackage=new BasePackage();
+//                ByteBuf flag=Unpooled.buffer(2);
+//                flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+//                mBasePackage.setFlag(flag);
+//                mBasePackage.setChannel((byte) 0x01);
+//                mBasePackage.setProtocolVersion((byte) 0x01);
+//                byte[] bbody={0x02
+//                        ,0x01,0x02,0x03,0x04,0x05,0x06
+//                        ,0x59,0x3D,0x34,0x11};
+//                ByteBuf body=Unpooled.buffer(bbody.length);
+//                body.writeBytes(bbody);
+//                mBasePackage.setBody(body);
+//                CustomMsg customMsg=mBasePackage.getCustomMsg();
+//                byte[] ee=new byte[2];
+//                customMsg.getEnd().getBytes(0,ee);
+//                System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
+//                timeClient.socketChannel.writeAndFlush(customMsg);
 
 
             }
@@ -356,16 +356,16 @@ public class LockClientUI extends JFrame{
 //            prop1.store(oFile, "The New properties file");
 //            oFile.close();
 
-            Properties prop2 = new Properties();
-            //读取属性文件a.properties
-            InputStream in = new BufferedInputStream(new FileInputStream("c.properties"));
-            prop2.load(in);     ///加载属性列表
-
-            if(null!=prop2.getProperty("port")){
-                port = Integer.valueOf(prop2.getProperty("port"));
-                url=prop2.getProperty("url");
-
-            }
+//            Properties prop2 = new Properties();
+//            //读取属性文件a.properties
+//            InputStream in = new BufferedInputStream(new FileInputStream("c.properties"));
+//            prop2.load(in);     ///加载属性列表
+//
+//            if(null!=prop2.getProperty("port")){
+//                port = Integer.valueOf(prop2.getProperty("port"));
+//                url=prop2.getProperty("url");
+//
+//            }
 
 
 

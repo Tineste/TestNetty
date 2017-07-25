@@ -272,14 +272,10 @@ public class LockClientHandler extends ChannelInboundHandlerAdapter {
                     mBasePackage2.setFlag(flag);
                     mBasePackage2.setChannel((byte) 0x11);
                     mBasePackage2.setProtocolVersion((byte) 0x01);
-                    byte[] data = {0x04,
-                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                            0x01,0x02,0x03,0x04,
-                            0x01,0x02,0x03,0x04,
+                    byte[] data = {
                             0x01
                     };
-                    ByteBuf body=Unpooled.buffer(data.length);
+                    ByteBuf body=Unpooled.copiedBuffer(req,data);
                     body.writeBytes(data);
                     mBasePackage2.setBody(body);
                     CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
@@ -320,14 +316,10 @@ public class LockClientHandler extends ChannelInboundHandlerAdapter {
                     mBasePackage2.setFlag(flag);
                     mBasePackage2.setChannel((byte) 0x11);
                     mBasePackage2.setProtocolVersion((byte) 0x01);
-                    byte[] data = {0x05,
-                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-                            0x01,0x02,0x03,0x04,
+                    byte[] data = {
                             0x01
                     };
-                    ByteBuf body=Unpooled.buffer(data.length);
-                    body.writeBytes(data);
+                    ByteBuf body=Unpooled.copiedBuffer(req,data);
                     mBasePackage2.setBody(body);
                     CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
                     byte[] ee2=new byte[2];
@@ -353,44 +345,26 @@ public class LockClientHandler extends ChannelInboundHandlerAdapter {
                     mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
                     StringBuffer sb=new StringBuffer();
                     sb.append("客户端收到服务器请求0x06 \r\n ");
-                    System.out.println("客户端收到服务器请求0x06");
                     if( mBasePackage.checkCRC()){
                         sb.append("CRC验证成功！\r\n");
+                        System.out.println("CRC验证成功");
                     }else {
                         sb.append("CRC验证失败！\r\n");
+                        System.out.println("CRC验证失败");
                     }
                     sb.append(CRCUtil.bytesToHexString(req)+".");
                     System.out.println();
                     System.out.println("  客户端应答服务器0x06请求并返回数据");
                     sb.append("\r\n客户端应答服务器0x06请求并返回数据 \r\n\r\n");
                     System.out.println();
-
-
-
-
                     BasePackage mBasePackage2=new BasePackage();
                     ByteBuf flag=Unpooled.buffer(2);
                     flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackage2.setFlag(flag);
                     mBasePackage2.setChannel((byte) 0x11);
                     mBasePackage2.setProtocolVersion((byte) 0x01);
-//                    byte[] data = {0x06,
-//                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-//                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-//                            0x01,
-//                            0x01,0x02,0x03,0x04,
-//                            0x01
-//                    };
-//                    ByteBuf body=Unpooled.buffer(data.length);
-//                    body.writeBytes(data);
-
-
                     byte[] resoult={0x01};
                     ByteBuf body=Unpooled.copiedBuffer(req,resoult);
-
-
-
-
                     mBasePackage2.setBody(body);
                     CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
                     byte[] ee2=new byte[2];
@@ -477,96 +451,8 @@ public class LockClientHandler extends ChannelInboundHandlerAdapter {
 
                 }
                 break;
-                case 0x2A:{
 
 
-                    BasePackage mBasePackage=new BasePackage();
-                    byte[] ee2=new byte[2];
-                    customMsgEnd.getBytes(0,ee2);
-                    System.out.println("客户端收到服务器返回的0x2A包尾是--->"+ CRCUtil.bytesToHexString(ee2));
-                    ByteBuf customMsgBody2=Unpooled.buffer(req.length);
-                    customMsgBody2.writeBytes(req);
-                    mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
-                    StringBuffer sb = new StringBuffer();
-                    sb.append("客户收到端服务器命令0x2A  \r\n");
-                    System.out.println("客户收到端服务器命令0x2A ");
-
-                    if( mBasePackage.checkCRC()){
-                        sb.append("CRC验证成功！\r\n");
-                    }else {
-                        sb.append("CRC验证失败！\r\n");
-                    }
-                    sb.append(CRCUtil.bytesToHexString(req));
-                    System.out.println("校对时间完成");
-                    sb.append("\r\n校对时间器完成\r\n\r\n");
-                    System.out.println();
-
-                    mUICallBack.refreshText(sb.toString());
-
-                    BasePackage mBasePackage2=new BasePackage();
-                    ByteBuf flag=Unpooled.buffer(2);
-                    flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-                    mBasePackage2.setFlag(flag);
-                    mBasePackage2.setChannel((byte) 0x11);
-                    mBasePackage2.setProtocolVersion((byte) 0x01);
-                    byte[] resoult={0x01};
-                    ByteBuf body=Unpooled.copiedBuffer(req,resoult);
-                    mBasePackage2.setBody(body);
-                    CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
-                    byte[] ee=new byte[2];
-                    customMsgaa.getEnd().getBytes(0,ee);
-                    System.out.println("客户端应答应服务器的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
-                    ctx.writeAndFlush(customMsgaa);
-
-
-
-                }
-                break;
-                case 0x2B:{
-
-
-                    BasePackage mBasePackage=new BasePackage();
-                    byte[] ee2=new byte[2];
-                    customMsgEnd.getBytes(0,ee2);
-                    System.out.println("客户端收到服务器返回的0x2B包尾是--->"+ CRCUtil.bytesToHexString(ee2));
-                    ByteBuf customMsgBody2=Unpooled.buffer(req.length);
-                    customMsgBody2.writeBytes(req);
-                    mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
-                    StringBuffer sb = new StringBuffer();
-                    sb.append("客户收到端服务器命令0x2B  \r\n");
-                    System.out.println("客户收到端服务器命令0x2B ");
-
-                    if( mBasePackage.checkCRC()){
-                        sb.append("CRC验证成功！\r\n");
-                    }else {
-                        sb.append("CRC验证失败！\r\n");
-                    }
-                    sb.append(CRCUtil.bytesToHexString(req));
-                    System.out.println("报警完成");
-                    sb.append("\r\n报警完成\r\n\r\n");
-                    System.out.println();
-
-                    mUICallBack.refreshText(sb.toString());
-
-                    BasePackage mBasePackage2=new BasePackage();
-                    ByteBuf flag=Unpooled.buffer(2);
-                    flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-                    mBasePackage2.setFlag(flag);
-                    mBasePackage2.setChannel((byte) 0x11);
-                    mBasePackage2.setProtocolVersion((byte) 0x01);
-                    byte[] resoult={0x01};
-                    ByteBuf body=Unpooled.copiedBuffer(req,resoult);
-                    mBasePackage2.setBody(body);
-                    CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
-                    byte[] ee=new byte[2];
-                    customMsgaa.getEnd().getBytes(0,ee);
-                    System.out.println("客户端应答应服务器的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
-                    ctx.writeAndFlush(customMsgaa);
-
-
-
-                }
-                break;
                 case 0x08:{
                     BasePackage mBasePackage=new BasePackage();
                     byte[] ee2=new byte[2];
@@ -626,13 +512,10 @@ public class LockClientHandler extends ChannelInboundHandlerAdapter {
                     mBasePackage2.setFlag(flag);
                     mBasePackage2.setChannel((byte) 0x11);
                     mBasePackage2.setProtocolVersion((byte) 0x01);
-                    byte[] data = {0x09,
-                            0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                            0x01,0x02,0x03,0x04,
+                    byte[] data = {
                             0x01
                     };
-                    ByteBuf body=Unpooled.buffer(data.length);
-                    body.writeBytes(data);
+                    ByteBuf body=Unpooled.copiedBuffer(req,data);
                     mBasePackage2.setBody(body);
                     CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
                     byte[] ee2=new byte[2];
