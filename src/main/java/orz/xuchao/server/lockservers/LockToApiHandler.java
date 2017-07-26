@@ -5,10 +5,12 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
+import orz.xuchao.server.apiserverclient.ShuntGatewayService;
 import orz.xuchao.server.bean.BasePackage;
 import orz.xuchao.server.bean.CustomMsg;
 import orz.xuchao.server.utils.CRCUtil;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 
@@ -28,48 +30,17 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("客户端发送了连接请求");
-
-//        System.out.println("通道活动了并发了第1次消息");
-//        byte[] req={(byte)0xEF,0x3A,
-//                0x00,0x0F
-//                ,0x01
-//                ,0x01
-//                ,0x01
-//                ,0x05,0x01,0x00,0x01,0x02,0x03
-//                ,0x59,0x3D,0x34,0x11
-//                ,0x51,(byte)0xC7
-//        };
-//        System.out.println("===>"+req[0]);
-//        ByteBuf message=Unpooled.buffer(req.length);
-//        message.writeBytes(req);
-//        ctx.writeAndFlush(message);
-
-
-//        System.out.println("通道活动了并发了第1次消息");
-//        ByteBuf flag=Unpooled.buffer(2);
-//        flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-//        int len=15;
-//        byte channel=0x01;
-//        byte protocolVersion=0x01;
-//        byte[] bbody={0x01
-//                ,0x05,0x01,0x00,0x01,0x02,0x03
-//                ,0x59,0x3D,0x34,0x11};
-//        ByteBuf body=Unpooled.buffer(bbody.length);
-//        body.writeBytes(bbody);
-//        ByteBuf end=Unpooled.buffer(2);
-//        end.writeBytes(new byte[]{0x51,(byte)0xC7});
-//        CustomMsg customMsg = new CustomMsg(flag, len,channel,protocolVersion,body, end);
-//        ctx.writeAndFlush(customMsg);
-
-//        连接服务器后开始定时发送心跳包
-
-
-
+        System.out.println("!!!!!!!!!!锁服务端完成了与api服务器的连接");
 
     }
 
 
+    @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        super.handlerRemoved(ctx);
+        System.out.println("!!!!!!!!锁服务端断开了与api服务器的连接");
+
+    }
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
@@ -604,6 +575,17 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
 
 
                     //                    门锁服务器收到api的指令，获取到锁的通道，给锁发命令
+
+
+                    Map<String, SocketChannel> map = TempTestChannelManagerService.getChannels();
+                    //遍历map中的值
+
+                    for (String key : map.keySet()) {
+
+                        if(map.get(key).equals(ctx.channel()))
+                            System.out.println("==========================>存在的通道"+key);
+                    }
+                    System.out.println(CRCUtil.bytesToHexString(mac));
                     SocketChannel obj = TempTestChannelManagerService.getGatewayChannel(CRCUtil.bytesToHexString(mac));
                     BasePackage mBasePackageToLock=new BasePackage();
                     ByteBuf flagToLock=Unpooled.buffer(2);

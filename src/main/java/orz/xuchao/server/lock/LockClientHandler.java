@@ -136,14 +136,14 @@ public class LockClientHandler extends ChannelInboundHandlerAdapter {
                     System.arraycopy(req, 7, url, 0, 200);
                     byte[] port=new byte[2];
                     System.arraycopy(req, 207, port, 0, 2);
-                    String newPort=""+port[0]+port[1];
+                    short newPort=CRCUtil.bytesToShort(port);
 
 
                     sb.append("\r\n"+"mac地址是："+CRCUtil.bytesToHexString(mac)+"\r\n");
                     sb.append("服务器端返回的时间是："+CRCUtil.bytesToTime(time)+"\r\n");
 
-                    sb.append("服务器端返回url是："+ new String(url)+"   端口是"+newPort+"\r\n");
-                    System.out.println("服务器端返回url是："+ new String(url)+"   端口是"+newPort+"\r\n");
+                    sb.append("服务器端返回url是："+ new String(CRCUtil.bytesToHexString(url))+"   端口是"+newPort+"\r\n");
+                    System.out.println("=====》服务器端返回url是："+new String(CRCUtil.bytesToHexString(url))+"   端口是"+newPort+"\r\n");
                     System.out.println("从中心服务器获取具体要链接的前置服务器域名或IP 完成");
                     sb.append("从中心服务器获取具体要链接的前置服务器域名"+new String(url)+"端口："+newPort+" 完成\r\n\r\n");
                     System.out.println();
@@ -170,6 +170,10 @@ public class LockClientHandler extends ChannelInboundHandlerAdapter {
                     }else {
                         sb.append("CRC验证失败！\r\n");
                     }
+
+                    byte[] mac=new byte[6];
+                    System.arraycopy(req, 1, mac, 0, 6);
+                    System.out.println(CRCUtil.bytesToHexString(mac));
 
                     sb.append(CRCUtil.bytesToHexString(req));
                     System.out.println("智能门禁向服务器申报MAC码并获取蓝牙密钥指令完成");
@@ -803,7 +807,8 @@ public class LockClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.warning("Unexpected exception form downstream:"+cause.getMessage());
-        ctx.close();
+        System.out.println("~~~~~~~~~~~~~~~Unexpected exception form downstream:"+cause.getMessage());
+//        ctx.close();
     }
 
 

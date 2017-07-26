@@ -8,6 +8,7 @@ import orz.xuchao.server.uicallback.ChanageUserverCallBack;
 import orz.xuchao.server.uicallback.UICallBack;
 import orz.xuchao.server.utils.CRCUtil;
 
+import javax.security.auth.login.LoginContext;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -29,8 +30,9 @@ public class LockClientUI extends JFrame{
     private JLabel jl1;
 
 //    private static String url="183.131.66.171";
-    private static String url="127.0.0.1";
-    private static int port=8984;
+    private static String url="192.168.51.152";
+//    private static String url="127.0.0.1";
+    private static int port=8981;
 
 
 
@@ -115,7 +117,7 @@ public class LockClientUI extends JFrame{
 //                        ,0x59,0x6C,0x3F, (byte) 0xD7};
 
                 byte[] orlder={0x01};
-                byte[] mac ={0x08,0x06, 0x00,0x00, 0x00,0x01};
+                byte[] mac =LockConfig.mac;
                 Calendar calendar = Calendar.getInstance();
                 byte[] time=CRCUtil.timeToBytes(calendar);
                 byte[] bbody=new byte[orlder.length+mac.length+time.length];
@@ -207,13 +209,15 @@ public class LockClientUI extends JFrame{
                 mBasePackage.setFlag(flag);
                 mBasePackage.setChannel((byte) 0x01);
                 mBasePackage.setProtocolVersion((byte) 0x01);
-                byte[] bbody={
-                        0x0A,
-                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                        0x01, 0x02, 0x03, 0x04
-                };
-                ByteBuf body=Unpooled.buffer(bbody.length);
-                body.writeBytes(bbody);
+
+
+                byte[] order={0x0A};
+                byte[] mac= LockConfig.mac;
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(2020,2,22);
+                byte[] time= CRCUtil.timeToBytes(calendar);
+
+                ByteBuf body=Unpooled.copiedBuffer(order,mac,time);
                 mBasePackage.setBody(body);
                 CustomMsg customMsg=mBasePackage.getCustomMsg();
                 byte[] ee=new byte[2];
@@ -239,14 +243,16 @@ public class LockClientUI extends JFrame{
                 mBasePackage.setFlag(flag);
                 mBasePackage.setChannel((byte) 0x01);
                 mBasePackage.setProtocolVersion((byte) 0x01);
-                byte[] bbody={
-                        0x08,
-                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                        0x01,
-                        0x01, 0x02, 0x03, 0x04
-                };
-                ByteBuf body=Unpooled.buffer(bbody.length);
-                body.writeBytes(bbody);
+
+
+                byte[] order={0x08};
+                byte[] mac= LockConfig.mac;
+                byte[] doorState={0x01};
+                Calendar calendar = Calendar.getInstance();
+                byte[] time= CRCUtil.timeToBytes(calendar);
+
+
+                ByteBuf body=Unpooled.copiedBuffer(order,mac,doorState,time);
                 mBasePackage.setBody(body);
                 CustomMsg customMsg=mBasePackage.getCustomMsg();
                 byte[] ee=new byte[2];
@@ -273,14 +279,14 @@ public class LockClientUI extends JFrame{
                 mBasePackage.setFlag(flag);
                 mBasePackage.setChannel((byte) 0x01);
                 mBasePackage.setProtocolVersion((byte) 0x01);
-                byte[] bbody={
-                        0x0B,
-                        0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-                        0x01,
-                        0x01, 0x02, 0x03, 0x04,
-                };
-                ByteBuf body=Unpooled.buffer(bbody.length);
-                body.writeBytes(bbody);
+
+                byte[] order={0x0B};
+                byte[] mac= LockConfig.mac;
+                byte[] alarmType={0x01};
+                Calendar calendar = Calendar.getInstance();
+                byte[] time= CRCUtil.timeToBytes(calendar);
+
+                ByteBuf body=Unpooled.copiedBuffer(order,mac,alarmType,time);
                 mBasePackage.setBody(body);
                 CustomMsg customMsg=mBasePackage.getCustomMsg();
                 byte[] ee=new byte[2];

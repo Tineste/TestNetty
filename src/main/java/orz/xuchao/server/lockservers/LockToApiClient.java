@@ -16,6 +16,8 @@ import orz.xuchao.server.code.CustomDecoder;
 import orz.xuchao.server.code.CustomEncoder;
 import orz.xuchao.server.utils.CRCUtil;
 
+import java.util.Calendar;
+
 /**
  * Created by Administrator on 2017/7/6 0006.
  */
@@ -67,12 +69,12 @@ public class LockToApiClient {
                 mBasePackage2.setChannel((byte) 0x11);
                 mBasePackage2.setProtocolVersion((byte) 0x01);
                 byte[] orlder={0x21};
-                byte[] lockMac={0x1,0x02,0x03,0x04,0x05,0x06};
                 byte[] serverMac={0x6,0x05,0x04,0x03,0x02,0x01};
-                byte[] time={0x01,0x02,0x03,0x04};
+                Calendar calendar = Calendar.getInstance();
+                byte[] time= CRCUtil.timeToBytes(calendar);
 
 
-                ByteBuf byteBuf=Unpooled.copiedBuffer(orlder,lockMac,serverMac,time);
+                ByteBuf byteBuf=Unpooled.copiedBuffer(orlder,serverMac,time);
 
                 mBasePackage2.setBody(byteBuf);
                 CustomMsg customMsgaa=mBasePackage2.getCustomMsg();

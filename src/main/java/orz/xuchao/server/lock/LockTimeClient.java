@@ -116,7 +116,7 @@ public class LockTimeClient {
 
                         }
                     });
-            f=b.connect(url,8985).sync();
+            f=b.connect(url,port).sync();
             if(f.isSuccess()){
                  System.out.println("==========================>完成服务器转接，注册mac地址0x02");
                 socketChannel=(SocketChannel)f.channel();
@@ -129,6 +129,9 @@ public class LockTimeClient {
                 mBasePackage.setProtocolVersion((byte) 0x01);
                 byte[] orlder={0x02};
                 byte[] mac = LockConfig.mac;
+
+                System.out.println(mac);
+
                 Calendar calendar = Calendar.getInstance();
                 byte[] time=CRCUtil.timeToBytes(calendar);
                 byte[] bbody=new byte[orlder.length+mac.length+time.length];

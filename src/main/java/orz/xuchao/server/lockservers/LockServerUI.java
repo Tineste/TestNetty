@@ -461,31 +461,31 @@ public class LockServerUI extends JFrame{
     }
     public static void main(String[] args) {
         int port = 8985;
-        int apiPort = 8984;
-        String apiURL = "127.0.0.1";
-        try {
-//            Properties prop1 = new Properties();
-//            ///保存属性到b.properties文件
-//            FileOutputStream oFile = new FileOutputStream("b.properties", true);//true表示追加打开
-//            prop1.setProperty("port", "8080");
-//            prop1.store(oFile, "The New properties file");
-//            oFile.close();
-
-            Properties prop2 = new Properties();
-            //读取属性文件a.properties
-            InputStream in = new BufferedInputStream(new FileInputStream("b.properties"));
-            prop2.load(in);     ///加载属性列表
-
-            if(null!=prop2.getProperty("port")){
-                port = Integer.valueOf(prop2.getProperty("port"));
-            }
-
-
-            in.close();
-
-        }catch (Exception e){
-
-        }
+        int apiPort = 8981;
+        String apiURL = "192.168.51.152";
+//        try {
+////            Properties prop1 = new Properties();
+////            ///保存属性到b.properties文件
+////            FileOutputStream oFile = new FileOutputStream("b.properties", true);//true表示追加打开
+////            prop1.setProperty("port", "8080");
+////            prop1.store(oFile, "The New properties file");
+////            oFile.close();
+//
+//            Properties prop2 = new Properties();
+//            //读取属性文件a.properties
+//            InputStream in = new BufferedInputStream(new FileInputStream("b.properties"));
+//            prop2.load(in);     ///加载属性列表
+//
+//            if(null!=prop2.getProperty("port")){
+//                port = Integer.valueOf(prop2.getProperty("port"));
+//            }
+//
+//
+//            in.close();
+//
+//        }catch (Exception e){
+//
+//        }
         //        启动客户端
         timeClient=new LockToApiClient();
         try {

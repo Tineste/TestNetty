@@ -149,9 +149,11 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     sb.append("mac地址是"+CRCUtil.bytesToHexString(lockMac)+" \r\n\r\n");
 //                    以mac为key，通道为value，放入map管理
                     TempTestChannelManagerService.addGatewayChannel(CRCUtil.bytesToHexString(lockMac),(SocketChannel)ctx.channel());
+                    Map map=TempTestChannelManagerService.getChannels();
+                    System.out.println(map);
                     mUICallBack.refreshText(sb.toString());
 //                    去中心服务器注册门锁的mac地址
-                    byte[] serverMac={0x06,0x05,0x04,0x03,0x02,0x01};
+                    byte[] serverMac=LockServerConfig.mac;
                     BasePackage mBasePackage2=new BasePackage();
                     ByteBuf flag=Unpooled.buffer(2);
                     flag.writeBytes(new byte[]{(byte)0xEF,0x3A});

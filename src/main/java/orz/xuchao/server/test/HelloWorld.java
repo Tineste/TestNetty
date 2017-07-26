@@ -3,11 +3,14 @@ package orz.xuchao.server.test;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.socket.SocketChannel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import orz.xuchao.server.utils.CRCUtil;
 
 import java.util.Calendar;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Administrator on 2017/7/4 0004.
@@ -24,6 +27,35 @@ public class HelloWorld {
 
 
     public static void main(String[] args)throws  Exception {
+
+
+         Map<String, String> map = new ConcurrentHashMap();
+        String a="dadfadsf";
+
+        map.put("aa",a);
+        map.put("aa",a);
+
+
+
+
+
+
+
+        short n=8985;
+        byte[] b11=CRCUtil.short2Bytes(n);
+        short n1=CRCUtil.bytesToShort(b11);
+
+        System.out.println();
+
+
+
+
+        byte[] serverMac={0x06,0x05,0x04,0x03,0x02,0x01};
+        System.out.println(CRCUtil.bytesToHexString(serverMac));
+        byte[] serverMac2=CRCUtil.bytesToHexString(serverMac).getBytes("utf-8");
+
+
+
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2020,2,22);
