@@ -460,8 +460,8 @@ public class LockServerUI extends JFrame{
 
     }
     public static void main(String[] args) {
-        int port = 8982;
-        int apiPort = 8981;
+        int port = 8985;
+        int apiPort = 8984;
         String apiURL = "127.0.0.1";
         try {
 //            Properties prop1 = new Properties();

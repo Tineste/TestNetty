@@ -76,12 +76,8 @@ public class LockTimeClient {
                 byte[] mac = LockConfig.mac;
                 Calendar calendar = Calendar.getInstance();
                 byte[] time=CRCUtil.timeToBytes(calendar);
-                byte[] bbody=new byte[orlder.length+mac.length+time.length];
-                System.arraycopy(orlder, 0, bbody, 0, orlder.length);
-                System.arraycopy(mac, 0, bbody, orlder.length, mac.length);
-                System.arraycopy(time, 0, bbody, orlder.length + mac.length, time.length);
-                ByteBuf body=Unpooled.buffer(bbody.length);
-                body.writeBytes(bbody);
+
+                ByteBuf body=Unpooled.copiedBuffer(orlder,mac,time);
                 mBasePackage.setBody(body);
                 CustomMsg customMsg=mBasePackage.getCustomMsg();
                 byte[] ee=new byte[2];
@@ -120,7 +116,7 @@ public class LockTimeClient {
 
                         }
                     });
-            f=b.connect(url,port).sync();
+            f=b.connect(url,8985).sync();
             if(f.isSuccess()){
                  System.out.println("==========================>完成服务器转接，注册mac地址0x02");
                 socketChannel=(SocketChannel)f.channel();
@@ -136,11 +132,8 @@ public class LockTimeClient {
                 Calendar calendar = Calendar.getInstance();
                 byte[] time=CRCUtil.timeToBytes(calendar);
                 byte[] bbody=new byte[orlder.length+mac.length+time.length];
-                System.arraycopy(orlder, 0, bbody, 0, orlder.length);
-                System.arraycopy(mac, 0, bbody, orlder.length, mac.length);
-                System.arraycopy(time, 0, bbody, orlder.length + mac.length, time.length);
-                ByteBuf body=Unpooled.buffer(bbody.length);
-                body.writeBytes(bbody);
+                ByteBuf body=Unpooled.copiedBuffer(orlder,mac,time);
+
                 mBasePackage.setBody(body);
                 CustomMsg customMsg=mBasePackage.getCustomMsg();
                 byte[] ee=new byte[2];

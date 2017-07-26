@@ -156,8 +156,8 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag=Unpooled.buffer(2);
                     flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackage2.setFlag(flag);
-                    mBasePackage2.setChannel((byte) 0x11);
-                    mBasePackage2.setProtocolVersion((byte) 0x01);
+                    mBasePackage2.setChannel( customMsgChannel);
+                    mBasePackage2.setProtocolVersion(customMsgProtocolVersion);
                     byte[] orlder={0x02};
                     ByteBuf byteBuf=Unpooled.copiedBuffer(orlder,lockMac,serverMac,time);
                     mBasePackage2.setBody(byteBuf);
@@ -201,6 +201,7 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
 //                }
 //                break;
                 case 0x03:{
+                    System.out.println("==LockServerHandler==>指令0x03的反馈 ");
                     BasePackage mBasePackage=new BasePackage();
                     byte[] ee2=new byte[2];
                     customMsgEnd.getBytes(0,ee2);
@@ -231,8 +232,8 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag = Unpooled.buffer(2);
                     flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
                     mBasePackage2.setFlag(flag);
-                    mBasePackage2.setChannel((byte) 0x11);
-                    mBasePackage2.setProtocolVersion((byte) 0x01);
+                    mBasePackage2.setChannel(customMsgChannel);
+                    mBasePackage2.setProtocolVersion(customMsgProtocolVersion);
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
                     mBasePackage2.setBody(body);
@@ -242,7 +243,7 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("客户端应答应服务器的包，包尾是--->" + CRCUtil.bytesToHexString(ee22));
                     LockServerUI.timeClient.socketChannel.writeAndFlush(customMsgaa);
 
-
+                    System.out.println("5====>指令0x03的反馈到api服务器 ");
                 }
                 break;
                 case 0x04:{
@@ -274,8 +275,8 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag = Unpooled.buffer(2);
                     flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
                     mBasePackage2.setFlag(flag);
-                    mBasePackage2.setChannel((byte) 0x11);
-                    mBasePackage2.setProtocolVersion((byte) 0x01);
+                    mBasePackage2.setChannel(customMsgChannel);
+                    mBasePackage2.setProtocolVersion(customMsgProtocolVersion);
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
                     mBasePackage2.setBody(body);
@@ -379,8 +380,8 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag = Unpooled.buffer(2);
                     flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
                     mBasePackage2.setFlag(flag);
-                    mBasePackage2.setChannel((byte) 0x11);
-                    mBasePackage2.setProtocolVersion((byte) 0x01);
+                    mBasePackage2.setChannel(customMsgChannel);
+                    mBasePackage2.setProtocolVersion(customMsgProtocolVersion);
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
                     mBasePackage2.setBody(body);
@@ -431,6 +432,7 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                 case 0x06:{
 
 
+                    System.out.println("==LockServerHandler==>门锁服务器 收到门锁开门指令0x06的反馈 ");
 
                     BasePackage mBasePackage=new BasePackage();
                     byte[] ee2=new byte[2];
@@ -444,14 +446,12 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("服务器收到客户端命令0x06的应答  ");
                     if( mBasePackage.checkCRC()){
                         sb.append("CRC验证成功！\r\n");
-                        System.out.println("CRC验证成功！\r\n");
+                        System.out.println("CRC验证成功");
                     }else {
                         sb.append("CRC验证失败！\r\n");
-                        System.out.println("CRC验证失败！\r\n");
+                        System.out.println("CRC验证失败！");
                     }
                     sb.append(CRCUtil.bytesToHexString(req)+".");
-                    System.out.println("服务器开门指令接收完成");
-                    System.out.println();
                     logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
@@ -460,8 +460,11 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag = Unpooled.buffer(2);
                     flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
                     mBasePackage2.setFlag(flag);
-                    mBasePackage2.setChannel((byte) 0x11);
-                    mBasePackage2.setProtocolVersion((byte) 0x01);
+                    mBasePackage2.setChannel(customMsgChannel);
+                    mBasePackage2.setProtocolVersion(customMsgProtocolVersion);
+
+
+
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
 
@@ -471,34 +474,9 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     customMsgaa.getEnd().getBytes(0, ee22);
                     System.out.println("锁服务器中转到锁的包，包尾是--->" + CRCUtil.bytesToHexString(ee22));
                     LockServerUI.timeClient.socketChannel.writeAndFlush(customMsgaa);
+                    System.out.println("5====>门锁服务器 将门锁开门指令0x06的反馈到api服务器 ");
 
 
-
-
-//                    SocketChannel obj =  TempTestChannelManagerService.getGatewayChannel("050100000001");
-//                    if(null!=obj) {
-//                        BasePackage mBasePackage2 = new BasePackage();
-//                        ByteBuf flag = Unpooled.buffer(2);
-//                        flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
-//                        mBasePackage2.setFlag(flag);
-//                        mBasePackage2.setChannel((byte) 0x11);
-//                        mBasePackage2.setProtocolVersion((byte) 0x01);
-//                        byte[] data = {0x16,
-//                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
-//                                0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-//                                0x01,
-//                                0x01, 0x02, 0x03, 0x04,
-//                                0x01
-//                        };
-//                        ByteBuf body = Unpooled.buffer(data.length);
-//                        body.writeBytes(data);
-//                        mBasePackage2.setBody(body);
-//                        CustomMsg customMsgaa = mBasePackage2.getCustomMsg();
-//                        byte[] ee22 = new byte[2];
-//                        customMsgaa.getEnd().getBytes(0, ee22);
-//                        System.out.println("客户端应答应服务器的包，包尾是--->" + CRCUtil.bytesToHexString(ee22));
-//                        obj.writeAndFlush(customMsgaa);
-//                    }
 
 
                 }
@@ -538,8 +516,11 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag3 = Unpooled.buffer(2);
                     flag3.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
                     mBasePackage3.setFlag(flag3);
-                    mBasePackage3.setChannel((byte) 0x11);
-                    mBasePackage3.setProtocolVersion((byte) 0x01);
+                    mBasePackage3.setChannel(customMsgChannel);
+                    mBasePackage3.setProtocolVersion(customMsgProtocolVersion);
+
+
+
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
                     mBasePackage3.setBody(body);
@@ -583,8 +564,8 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag3 = Unpooled.buffer(2);
                     flag3.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
                     mBasePackage3.setFlag(flag3);
-                    mBasePackage3.setChannel((byte) 0x11);
-                    mBasePackage3.setProtocolVersion((byte) 0x01);
+                    mBasePackage3.setChannel(customMsgChannel);
+                    mBasePackage3.setProtocolVersion(customMsgProtocolVersion);
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
                     mBasePackage3.setBody(body);
@@ -597,29 +578,29 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
 
 
 
-                    byte[] order={0x08};
-                    byte[] mac=new byte[6];
-                    System.arraycopy(req, 1, mac, 0, 6);
-                    byte[] time=new byte[4];
-                    System.arraycopy(req, 8, time, 0, 4);
-                    Calendar calendar= Calendar.getInstance();
-                    byte[] rightTime= CRCUtil.timeToBytes(calendar);
-                    byte[] resoult={0x01};
-
-                    BasePackage mBasePackage2=new BasePackage();
-                    ByteBuf flag=Unpooled.buffer(2);
-                    flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
-                    mBasePackage2.setFlag(flag);
-                    mBasePackage2.setChannel((byte) 0x11);
-                    mBasePackage2.setProtocolVersion((byte) 0x01);
-
-                    ByteBuf body2=Unpooled.copiedBuffer(order,mac,time,rightTime,resoult);
-                    mBasePackage2.setBody(body2);
-                    CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
-                    byte[] ee2=new byte[2];
-                    customMsgaa.getEnd().getBytes(0,ee2);
-                    System.out.println("服务器返回客户端的包，包尾是--->"+ CRCUtil.bytesToHexString(ee2));
-                    ctx.writeAndFlush(customMsgaa);
+//                    byte[] order={0x08};
+//                    byte[] mac=new byte[6];
+//                    System.arraycopy(req, 1, mac, 0, 6);
+//                    byte[] time=new byte[4];
+//                    System.arraycopy(req, 8, time, 0, 4);
+//                    Calendar calendar= Calendar.getInstance();
+//                    byte[] rightTime= CRCUtil.timeToBytes(calendar);
+//                    byte[] resoult={0x01};
+//
+//                    BasePackage mBasePackage2=new BasePackage();
+//                    ByteBuf flag=Unpooled.buffer(2);
+//                    flag.writeBytes(new byte[]{(byte)0xEF,0x3A});
+//                    mBasePackage2.setFlag(flag);
+//                    mBasePackage2.setChannel((byte) 0x11);
+//                    mBasePackage2.setProtocolVersion((byte) 0x01);
+//
+//                    ByteBuf body2=Unpooled.copiedBuffer(order,mac,time,rightTime,resoult);
+//                    mBasePackage2.setBody(body2);
+//                    CustomMsg customMsgaa=mBasePackage2.getCustomMsg();
+//                    byte[] ee2=new byte[2];
+//                    customMsgaa.getEnd().getBytes(0,ee2);
+//                    System.out.println("服务器返回客户端的包，包尾是--->"+ CRCUtil.bytesToHexString(ee2));
+//                    ctx.writeAndFlush(customMsgaa);
                     logger.info(sb.toString());
                     mUICallBack.refreshText(sb.toString());
 
@@ -657,8 +638,8 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag = Unpooled.buffer(2);
                     flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
                     mBasePackage2.setFlag(flag);
-                    mBasePackage2.setChannel((byte) 0x11);
-                    mBasePackage2.setProtocolVersion((byte) 0x01);
+                    mBasePackage2.setChannel(customMsgChannel);
+                    mBasePackage2.setProtocolVersion(customMsgProtocolVersion);
 
 
 
@@ -713,8 +694,8 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag3 = Unpooled.buffer(2);
                     flag3.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
                     mBasePackage3.setFlag(flag3);
-                    mBasePackage3.setChannel((byte) 0x11);
-                    mBasePackage3.setProtocolVersion((byte) 0x01);
+                    mBasePackage3.setChannel(customMsgChannel);
+                    mBasePackage3.setProtocolVersion(customMsgProtocolVersion);
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
                     mBasePackage3.setBody(body);
@@ -759,8 +740,8 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag3 = Unpooled.buffer(2);
                     flag3.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
                     mBasePackage3.setFlag(flag3);
-                    mBasePackage3.setChannel((byte) 0x11);
-                    mBasePackage3.setProtocolVersion((byte) 0x01);
+                    mBasePackage3.setChannel(customMsgChannel);
+                    mBasePackage3.setProtocolVersion(customMsgProtocolVersion);
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
                     mBasePackage3.setBody(body);
@@ -843,8 +824,8 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag = Unpooled.buffer(2);
                     flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
                     mBasePackage2.setFlag(flag);
-                    mBasePackage2.setChannel((byte) 0x11);
-                    mBasePackage2.setProtocolVersion((byte) 0x01);
+                    mBasePackage2.setChannel(customMsgChannel);
+                    mBasePackage2.setProtocolVersion(customMsgProtocolVersion);
 
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
@@ -932,8 +913,8 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flag = Unpooled.buffer(2);
                     flag.writeBytes(new byte[]{(byte) 0xEF, 0x3A});
                     mBasePackage2.setFlag(flag);
-                    mBasePackage2.setChannel((byte) 0x11);
-                    mBasePackage2.setProtocolVersion((byte) 0x01);
+                    mBasePackage2.setChannel(customMsgChannel);
+                    mBasePackage2.setProtocolVersion(customMsgProtocolVersion);
 
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
@@ -1068,7 +1049,8 @@ public class LockServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        ctx.close();
+        System.err.println(cause.getMessage());
+//        ctx.close();
     }
 
 

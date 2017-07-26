@@ -111,7 +111,7 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     customMsgBody2.writeBytes(req);
                     byte[] ee=new byte[2];
                     customMsgEnd.getBytes(0,ee);
-                    System.out.println("门锁服务器 收到的包0x21，包尾是--->"+ CRCUtil.bytesToHexString(ee));
+
 
                     sb.append("门锁服务器 收到的包0x21，包尾是--->"+ CRCUtil.bytesToHexString(ee));
 
@@ -153,10 +153,11 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     customMsgToLock.getEnd().getBytes(0,eeToLock);
                     System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(eeToLock));
                     obj.writeAndFlush(customMsgToLock);
+
                 }
                 break;
                 case 0x06:{
-                    System.out.println("锁服务器收到锁的返回0x06 ");
+                    System.out.println("==LockToApiHandler==>门锁服务器 收到开门指令0x06");
                     BasePackage mBasePackage=new BasePackage();
                     ByteBuf customMsgBody2=Unpooled.buffer(req.length);
                     customMsgBody2.writeBytes(req);
@@ -165,8 +166,8 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("客户端收到的包，包尾是--->"+ CRCUtil.bytesToHexString(ee));
                     mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
                     StringBuffer sb=new StringBuffer();
-                    sb.append("客户端收到服务器请求0x06 \r\n ");
-                    System.out.println("客户端收到服务器请求0x06");
+                    sb.append("锁服务器端收到服务器请求0x06 \r\n ");
+                    System.out.println("锁服务器端收到服务器请求0x06");
                     if( mBasePackage.checkCRC()){
                         sb.append("CRC验证成功！\r\n");
                         System.out.println("CRC验证成功!");
@@ -184,31 +185,17 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
 
                     byte[] time=new byte[4];
                     System.arraycopy(req, 16, time, 0, 4);
-
-
                     sb.append(CRCUtil.bytesToHexString(req)+".");
-                    System.out.println();
-                    sb.append("\r\n客户端应答服务器0x06请求并返回数据 \r\n\r\n");
-                    System.out.println();
-
-
-
-
-
-
-
-
 //                    api服务器的客户端（锁服务器）收到 api服务器的请求，获取到锁的通道，给锁发命令开门
 //                    门锁服务器通知门锁开门
-
-                    System.out.println("门锁服务器转给api服务器0x06");
+                    System.out.println("门锁服务器收到api服务器开门指令0x06");
                     SocketChannel obj = TempTestChannelManagerService.getGatewayChannel(CRCUtil.bytesToHexString(mac));
                     BasePackage mBasePackageToLock=new BasePackage();
                     ByteBuf flagToLock=Unpooled.buffer(2);
                     flagToLock.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackageToLock.setFlag(flagToLock);
-                    mBasePackageToLock.setChannel((byte) 0x01);
-                    mBasePackageToLock.setProtocolVersion((byte) 0x01);
+                    mBasePackageToLock.setChannel(customMsgChannel);
+                    mBasePackageToLock.setProtocolVersion(customMsgProtocolVersion);
 
                     byte[] orlder={0x06};
                     ByteBuf body2=Unpooled.copiedBuffer(orlder,mac,id,type,time);
@@ -218,11 +205,14 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     customMsgToLock.getEnd().getBytes(0,eeToLock);
                     System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(eeToLock));
                     obj.writeAndFlush(customMsgToLock);
+                    System.out.println("====>3门锁服务器 收到开门指令0x06并中转到锁  包尾是--->"+ CRCUtil.bytesToHexString(ee));
 
 
                 }
                 break;
                 case 0x03:{
+
+                    System.out.println("==LockToApiHandler==>从智能门禁读取一条UID指令 0x03");
                     BasePackage mBasePackage=new BasePackage();
                     ByteBuf customMsgBody2=Unpooled.buffer(req.length);
                     customMsgBody2.writeBytes(req);
@@ -232,7 +222,6 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     mBasePackage.setCustomMsgAttribute(customMsgFlag,customMsgLen,customMsgChannel,customMsgProtocolVersion,customMsgBody2,customMsgEnd);
                     StringBuffer sb=new StringBuffer();
                     sb.append("客户端收到服务器请求0x23 \r\n ");
-                    System.out.println("客户端收到服务器请求0x23");
                     if( mBasePackage.checkCRC()){
                         sb.append("CRC验证成功！\r\n");
                     }else {
@@ -247,10 +236,8 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
 
 
                     sb.append(CRCUtil.bytesToHexString(req)+".");
-                    System.out.println();
                     System.out.println("  客户端应答服务器0x03请求并返回数据");
                     sb.append("\r\n客户端应答服务器0x03请求并返回数据 \r\n\r\n");
-                    System.out.println();
 
 
 
@@ -264,8 +251,8 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flagToLock=Unpooled.buffer(2);
                     flagToLock.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackageToLock.setFlag(flagToLock);
-                    mBasePackageToLock.setChannel((byte) 0x01);
-                    mBasePackageToLock.setProtocolVersion((byte) 0x01);
+                    mBasePackageToLock.setChannel(customMsgChannel);
+                    mBasePackageToLock.setProtocolVersion(customMsgProtocolVersion);
                     byte[] orlder={0x03};
                     ByteBuf body2=Unpooled.copiedBuffer(orlder,mac,time);
                     mBasePackageToLock.setBody(body2);
@@ -275,7 +262,7 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     System.out.println("客户端发出的包，包尾是--->"+ CRCUtil.bytesToHexString(eeToLock));
                     obj.writeAndFlush(customMsgToLock);
 
-
+                    System.out.println("==LockToApiHandler==>从智能门禁读取一条UID指令0x03  包尾是--->"+ CRCUtil.bytesToHexString(ee));
                 }
                 break;
                 case 0x04:{
@@ -301,7 +288,7 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
 
                     sb.append(CRCUtil.bytesToHexString(req)+".");
                     System.out.println();
-                    System.out.println("  客户端应答服务器0x24请求并返回数据");
+                    System.out.println("  客户端应答服务器0x24请求并返回数据   "+CRCUtil.bytesToHexString(req));
                     sb.append("\r\n客户端应答服务器0x04请求并返回数据 \r\n\r\n");
                     System.out.println();
 
@@ -315,10 +302,10 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flagToLock=Unpooled.buffer(2);
                     flagToLock.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackageToLock.setFlag(flagToLock);
-                    mBasePackageToLock.setChannel((byte) 0x01);
-                    mBasePackageToLock.setProtocolVersion((byte) 0x01);
+                    mBasePackageToLock.setChannel(customMsgChannel);
+                    mBasePackageToLock.setProtocolVersion(customMsgProtocolVersion);
 
-                    req[0]=0x04;
+
                     ByteBuf body3=Unpooled.copiedBuffer(req);
                     mBasePackageToLock.setBody(body3);
 
@@ -365,8 +352,8 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flagToLock=Unpooled.buffer(2);
                     flagToLock.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackageToLock.setFlag(flagToLock);
-                    mBasePackageToLock.setChannel((byte) 0x01);
-                    mBasePackageToLock.setProtocolVersion((byte) 0x01);
+                    mBasePackageToLock.setChannel(customMsgChannel);
+                    mBasePackageToLock.setProtocolVersion(customMsgProtocolVersion);
 
                     req[0]=0x05;
                     ByteBuf body3=Unpooled.copiedBuffer(req);
@@ -415,8 +402,8 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flagToLock=Unpooled.buffer(2);
                     flagToLock.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackageToLock.setFlag(flagToLock);
-                    mBasePackageToLock.setChannel((byte) 0x01);
-                    mBasePackageToLock.setProtocolVersion((byte) 0x01);
+                    mBasePackageToLock.setChannel(customMsgChannel);
+                    mBasePackageToLock.setProtocolVersion(customMsgProtocolVersion);
                     ByteBuf body3=Unpooled.copiedBuffer(req);
                     mBasePackageToLock.setBody(body3);
 
@@ -463,8 +450,8 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flagToLock=Unpooled.buffer(2);
                     flagToLock.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackageToLock.setFlag(flagToLock);
-                    mBasePackageToLock.setChannel((byte) 0x01);
-                    mBasePackageToLock.setProtocolVersion((byte) 0x01);
+                    mBasePackageToLock.setChannel(customMsgChannel);
+                    mBasePackageToLock.setProtocolVersion(customMsgProtocolVersion);
 
                     ByteBuf body3=Unpooled.copiedBuffer(req);
                     mBasePackageToLock.setBody(body3);
@@ -562,8 +549,8 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flagToLock=Unpooled.buffer(2);
                     flagToLock.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackageToLock.setFlag(flagToLock);
-                    mBasePackageToLock.setChannel((byte) 0x01);
-                    mBasePackageToLock.setProtocolVersion((byte) 0x01);
+                    mBasePackageToLock.setChannel(customMsgChannel);
+                    mBasePackageToLock.setProtocolVersion(customMsgProtocolVersion);
 
                     ByteBuf body3=Unpooled.copiedBuffer(req);
                     mBasePackageToLock.setBody(body3);
@@ -577,33 +564,7 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
 
                 }
                 break;
-
-//                case 0x36:{
-//
-//                    byte[] lockMac = new byte[6];
-//                    System.arraycopy(req, 1, lockMac, 0, 6);
-//                    byte[] id = new byte[8];
-//                    System.arraycopy(req, 7, id, 0, 8);
-//
-//                    byte[] type = new byte[1];
-//                    System.arraycopy(req, 15, type, 0, 1);
-//
-//                    byte[] time = new byte[4];
-//                    System.arraycopy(req, 16, time, 0, 4);
-//
-//                    byte[] resoult = new byte[1];
-//                    System.arraycopy(req, 20, time, 0, 1);
-//                    System.out.println("\r\n门锁的mac地址是："+CRCUtil.bytesToHexString(lockMac)+"\r\n");
-//                    System.out.println("\r\nid是："+CRCUtil.bytesToHexString(id)+"\r\n");
-//                    System.out.println("\r\ntype是："+CRCUtil.bytesToHexString(type)+"\r\n");
-//                    System.out.println("\r\n时间是："+CRCUtil.bytesToHexString(time)+"\r\n");
-//                    System.out.println("服务器返回客户端0x26指令的结果"+resoult+" \r\n\r\n");
-//                    System.out.println();
-//                }
-//                break;
-
                 case 0x07:{
-
                     System.out.println("服务器返回客户端0x37指令的结果\r\n\r\n");
                     System.out.println();
                     byte[] mac=new byte[6];
@@ -614,8 +575,9 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flagToLock=Unpooled.buffer(2);
                     flagToLock.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackageToLock.setFlag(flagToLock);
-                    mBasePackageToLock.setChannel((byte) 0x01);
-                    mBasePackageToLock.setProtocolVersion((byte) 0x01);
+                    mBasePackageToLock.setChannel(customMsgChannel);
+                    mBasePackageToLock.setProtocolVersion(customMsgProtocolVersion);
+
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
                     mBasePackageToLock.setBody(body);
@@ -647,8 +609,8 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flagToLock=Unpooled.buffer(2);
                     flagToLock.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackageToLock.setFlag(flagToLock);
-                    mBasePackageToLock.setChannel((byte) 0x01);
-                    mBasePackageToLock.setProtocolVersion((byte) 0x01);
+                    mBasePackageToLock.setChannel(customMsgChannel);
+                    mBasePackageToLock.setProtocolVersion(customMsgProtocolVersion);
 
                     ByteBuf body = Unpooled.buffer(req.length);
                     body.writeBytes(req);
@@ -677,8 +639,8 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flagToLock=Unpooled.buffer(2);
                     flagToLock.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackageToLock.setFlag(flagToLock);
-                    mBasePackageToLock.setChannel((byte) 0x01);
-                    mBasePackageToLock.setProtocolVersion((byte) 0x01);
+                    mBasePackageToLock.setChannel(customMsgChannel);
+                    mBasePackageToLock.setProtocolVersion(customMsgProtocolVersion);
 
 
                     ByteBuf body = Unpooled.buffer(req.length);
@@ -708,8 +670,8 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
                     ByteBuf flagToLock=Unpooled.buffer(2);
                     flagToLock.writeBytes(new byte[]{(byte)0xEF,0x3A});
                     mBasePackageToLock.setFlag(flagToLock);
-                    mBasePackageToLock.setChannel((byte) 0x01);
-                    mBasePackageToLock.setProtocolVersion((byte) 0x01);
+                    mBasePackageToLock.setChannel(customMsgChannel);
+                    mBasePackageToLock.setProtocolVersion(customMsgProtocolVersion);
 
 
                     ByteBuf body = Unpooled.buffer(req.length);
@@ -781,7 +743,7 @@ public class LockToApiHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         logger.warning("Unexpected exception form downstream:"+cause.getMessage());
-        ctx.close();
+//        ctx.close();
     }
 
 

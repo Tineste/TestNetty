@@ -30,7 +30,7 @@ public class LockClientUI extends JFrame{
 
 //    private static String url="183.131.66.171";
     private static String url="127.0.0.1";
-    private static int port=8981;
+    private static int port=8984;
 
 
 
@@ -326,7 +326,7 @@ public class LockClientUI extends JFrame{
 
             public void chanageServer(String url, int port) {
                 try {
-                    System.out.println("准备重新连接新服务器---");
+                    System.out.println("准备重新连接新服务器---"+url+":"+port);
                     timeClient.reConnect(port,url);
                 } catch (Exception e) {
                     e.printStackTrace();
